@@ -6,11 +6,12 @@ begin
   Jeweler::Tasks.new do |gem|
     gem.name = "words"
     gem.summary = %Q{A fast, easy to use interface to WordNet® with cross ruby distribution compatability.}
-    gem.description = %Q{TODO: longer description of your gem}
+    gem.description = %Q{A fast, easy to use interface to WordNet® with cross ruby distribution compatability. We use TokyoCabinet to store the dataset and the excellent rufus-tokyo to interface with it. This allows us to have full compatability across ruby distributions while still remaining both fast and simple to use.}
     gem.email = "roja@arbia.co.uk"
     gem.homepage = "http://github.com/roja/words"
     gem.authors = ["Roja Buck"]
-    gem.add_development_dependency "thoughtbot-shoulda", ">= 0"
+    gem.add_development_dependency "trollop", ">= 1.15"
+    gem.add_dependency 'rufus-tokyo', '>= 1.0.5'
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   Jeweler::GemcutterTasks.new

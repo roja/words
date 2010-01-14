@@ -1,6 +1,6 @@
 = words
 
-Description goes here.
+A fast, easy to use interface to WordNet® with cross ruby distribution compatability. We use TokyoCabinet to store the dataset and the excellent rufus-tokyo to interface with it. This allows us to have full compatability across ruby distributions while still remaining both fast and simple to use.
 
 == Note on Patches/Pull Requests
  
