@@ -156,7 +156,7 @@ module Words
     def initialize(lemma_hash)
       @lemma_hash = lemma_hash
       # construct some conveniance menthods for relation type access
-      Relation::SYMBOL_TO_POS.keys.each do |pos|
+      SYMBOL_TO_POS.keys.each do |pos|
         self.class.send(:define_method, "#{pos}s?") do 
           synsets(pos).size > 0
         end
