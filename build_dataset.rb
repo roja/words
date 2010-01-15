@@ -6,7 +6,6 @@ require 'pathname'
 # gem includes
 require 'rubygems'
 require 'trollop'
-require 'pstore'
 require 'rufus-tokyo'
 
 POS_FILE_TYPES = %w{ adj adv noun verb }
@@ -27,7 +26,10 @@ if __FILE__ == $0
   opts = Trollop::options do
     opt :verbose, "Output verbose program detail.", :default => false
     opt :wordnet, "Location of the wordnet dictionary directory", :default => "Search..."
+    opt :build_tokyo, "Build the tokyo dataset?", :default => false
+    opt :build_pure, "Build the pure ruby dataset?", :default => false
   end
+  Trollop::die :build_tokyo, "Either tokyo dataset or pure ruby dataset are required".red if !opts[:build_tokyo] && !opts[:build_pure]
   puts "Verbose mode enabled" if (VERBOSE = opts[:verbose])
   
   wordnet_dir = nil
