@@ -2,11 +2,43 @@
 
 ## About ##
 
-Words implements a fast interface to [Wordnet®](http://wordnet.princeton.edu) which makes use of [Tokyo Cabinet](http://1978th.net/tokyocabinet/) and a FFI interface, [rufus-tokyo](http://github.com/jmettraux/rufus-tokyo), to provide cross ruby distribution compatability and blistering speed. I have attempted to provide ease of use in the form of a simple yet powerful api and installation is a sintch, we even include the data in it's tokyo data format (subject to the original wordnet licencing.)
+Words implements a fast interface to [Wordnet®](http://wordnet.princeton.edu) which provides both a pure ruby and an FFI powered backend over the same easy-to-use API. The FFI backend makes use of [Tokyo Cabinet](http://1978th.net/tokyocabinet/) and the FFI interface, [rufus-tokyo](http://github.com/jmettraux/rufus-tokyo), to provide cross ruby distribution compatability and blistering speed. The pure ruby interface operates on a special ruby optimised index along with the basic dictionary files provided by WordNet®. I have attempted to provide ease of use in the form of a simple yet powerful api and installation is a sintch!
 
-## Installation ##
+## Pre-Installation ##
 
-First ensure you have [Tokyo Cabinet](http://1978th.net/tokyocabinet/) installed. It should be nice and easy...
+First ensure you have a copy of the wordnet data files. This is generally available from your Linux/OSX package manager:
+
+    #Ubuntu
+    sudo apt-get install wordnet-base
+    
+    #Fedora/RHL
+    sudo yum update wordnet
+    
+    #MacPorts
+    sudo port install wordnet
+    
+or you can simply download and install (Unix/OSX):
+
+	wget http://wordnetcode.princeton.edu/3.0/WNdb-3.0.tar.gz
+	sudo mkdir /usr/local/share/wordnet
+	sudo tar -C /usr/local/share/wordnet/ -xzf WNdb-3.0.tar.gz
+	
+or (Windows)
+
+	Download http://wordnetcode.princeton.edu/3.0/WNdb-3.0.tar.gz
+	Unzip
+
+## For Tokyo Backend Only ##
+
+Unless you want to use the tokyo backend you are now ready to install Words && build the data, otherwise if you want to use the tokyo backend (FAST!) you will also need [Tokyo Cabinet](http://1978th.net/tokyocabinet/) installed. It should be nice and easy... something like:
+
+    wget http://1978th.net/tokyocabinet/tokyocabinet-1.4.41.tar.gz
+    cd tokyo-cabinet/
+    ./configure
+    make
+    sudo make install
+    
+## GEM Installation ##
 
 After this it should be just a gem to install. For those of you with old rubygems versions first:
 
@@ -19,22 +51,22 @@ Otherwise and after it's simply:
 	
 Then your ready to rock and roll. :)
 
-## Build Data (Optional) ##
+## Build Data ##
 
-If you want to build the wordnet dataset file yourself, from the original wordnet files, you can use the bundled "build_dataset.rb"
+To build the wordnet dataset (or index for pure) file yourself, from the original wordnet files, you can use the bundled "build_wordnet" command
 
-	./build_dataset.rb -h #this will give you the usage
-	sudo ./build_dataset.rb #this will attempt to build the data locating the original wordnet files through a search...
+	build_wordnet -h # this will give you the usage information
+	sudo build_wordnet -v --build-tokyo # this would attempt to build the tokyo backend data locating the original wordnet files through a search...
+	sudo build_wordnet -v --build-pure # this would attempt to build the pure backend index locating the original wordnet files through a search...
 
 ## Usage ##
 
 Heres a few little examples of using words within your programs.
 
-
     require 'rubygems'
     require 'words'
     
-    data = Words::Words.new
+    data = Words::Words.new # or: data = Words::Words.new(:pure) for the pure ruby backend
     
     # locate a word
     lemma = data.find("bat")
@@ -45,6 +77,7 @@ Heres a few little examples of using words within your programs.
     lemma.synsets(:noun) # => array of synsets which represent nouns of the lemma bat
     # or
     lemma.nouns # => array of synsets which represent nouns of the lemma bat
+    lemma.noun_ids # => array of synsets ids which represent nouns of the lemma bat
     lemma.verbs? #=> true
     
     # specify a sense
@@ -53,6 +86,7 @@ Heres a few little examples of using words within your programs.
     
     sense.gloss # => a club used for hitting a ball in various games
     sense2.words # => ["cricket bat", "bat"]
+    sense2.lexical_description # => a description of the lexical meaning of the synset
     sense.relations.first # => "Semantic hypernym relation between n02806379 and n03053474"
 
     sense.relations(:hyponym) # => Array of hyponyms associated with the sense
@@ -68,7 +102,8 @@ Heres a few little examples of using words within your programs.
     sense.derivationally_related_forms.first.source_word # => "bat"
     sense.derivationally_related_forms.first.destination_word # => "bat"
     sense.derivationally_related_forms.first.destination # => the synset of v01413191
-        
+    
+These and more examples are available from within the examples.rb file!        
 
 ## Note on Patches/Pull Requests ##
  

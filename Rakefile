@@ -10,9 +10,10 @@ begin
     gem.email = "roja@arbia.co.uk"
     gem.homepage = "http://github.com/roja/words"
     gem.authors = ["Roja Buck"]
-    gem.add_development_dependency "trollop", ">= 1.15"
+    gem.add_dependency "trollop", ">= 1.15"
     gem.add_dependency 'rufus-tokyo', '>= 1.0.5'
-    # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
+    gem.executables = [ "build_wordnet" ]
+    gem.default_executable = "build_wordnet"
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
@@ -46,7 +47,7 @@ task :default => :test
 require 'rake/rdoctask'
 Rake::RDocTask.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION') : ""
-
+  
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title = "words #{version}"
   rdoc.rdoc_files.include('README*')
