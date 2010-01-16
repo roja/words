@@ -5,13 +5,15 @@
 
 Gem::Specification.new do |s|
   s.name = %q{words}
-  s.version = "0.1.0"
+  s.version = "0.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Roja Buck"]
-  s.date = %q{2010-01-14}
+  s.date = %q{2010-01-16}
+  s.default_executable = %q{build_wordnet}
   s.description = %q{A fast, easy to use interface to WordNet® with cross ruby distribution compatability. We use TokyoCabinet to store the dataset and the excellent rufus-tokyo to interface with it. This allows us to have full compatability across ruby distributions while still remaining both fast and simple to use.}
   s.email = %q{roja@arbia.co.uk}
+  s.executables = ["build_wordnet"]
   s.extra_rdoc_files = [
     "LICENSE",
      "README.markdown"
@@ -22,12 +24,12 @@ Gem::Specification.new do |s|
      "README.markdown",
      "Rakefile",
      "VERSION",
-     "build_dataset.rb",
-     "data/wordnet.tct",
+     "bin/build_wordnet",
      "examples.rb",
      "lib/words.rb",
      "test/helper.rb",
-     "test/test_words.rb"
+     "test/test_words.rb",
+     "words.gemspec"
   ]
   s.homepage = %q{http://github.com/roja/words}
   s.rdoc_options = ["--charset=UTF-8"]
@@ -44,7 +46,7 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
-      s.add_development_dependency(%q<trollop>, [">= 1.15"])
+      s.add_runtime_dependency(%q<trollop>, [">= 1.15"])
       s.add_runtime_dependency(%q<rufus-tokyo>, [">= 1.0.5"])
     else
       s.add_dependency(%q<trollop>, [">= 1.15"])
