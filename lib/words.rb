@@ -21,7 +21,7 @@ module Words
       
       if @data_path.exist?
         if @connection_type == :tokyo
-          @connection = Rufus::Tokyo::Table.new(@data_path.to_s)
+          @connection = Rufus::Tokyo::Table.new(@data_path.to_s, :mode => 'r')
           @connected = true
         elsif @connection_type == :pure
           # open the index is there

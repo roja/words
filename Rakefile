@@ -5,8 +5,8 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "words"
-    gem.summary = %Q{A fast, easy to use interface to WordNet® with cross ruby distribution compatability.}
-    gem.description = %Q{A fast, easy to use interface to WordNet® with cross ruby distribution compatability. We use TokyoCabinet to store the dataset and the excellent rufus-tokyo to interface with it. This allows us to have full compatability across ruby distributions while still remaining both fast and simple to use.}
+    gem.summary = %Q{A Fast & Easy to use interface to WordNet® with cross ruby distribution compatability.}
+    gem.description = %Q{Words implements a fast interface to [Wordnet®](http://wordnet.princeton.edu) which provides both a pure ruby and an FFI powered backend over the same easy-to-use API. The FFI backend makes use of [Tokyo Cabinet](http://1978th.net/tokyocabinet/) and the FFI interface, [rufus-tokyo](http://github.com/jmettraux/rufus-tokyo), to provide cross ruby distribution compatability and blistering speed. The pure ruby interface operates on a special ruby optimised index along with the basic dictionary files provided by WordNet®. I have attempted to provide ease of use in the form of a simple yet powerful api and installation is a sintch!}
     gem.email = "roja@arbia.co.uk"
     gem.homepage = "http://github.com/roja/words"
     gem.authors = ["Roja Buck"]

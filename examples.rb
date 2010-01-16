@@ -1,10 +1,11 @@
 #!/usr/bin/env ruby
 
-require 'lib/words'
+require 'rubygems'
+require 'words'
 
 if __FILE__ == $0
   
-  wordnet = Words::Words.new  # :pure
+  wordnet = Words::Words.new  :pure
   
   puts wordnet
   
