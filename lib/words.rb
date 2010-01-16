@@ -10,12 +10,94 @@ module Words
   
   class WordnetConnection
     
-    def self.wordnet_connection
-      @@wordnet_connection
+    SHORT_TO_POS_FILE_TYPE = { 'a' => 'adj', 'r' => 'adv', 'n' => 'noun', 'v' => 'verb' }
+    
+    attr_reader :connected, :connection_type, :data_path, :wordnet_dir
+    
+    def initialize(type, path, wordnet_path)
+      @data_path = Pathname.new("#{File.dirname(__FILE__)}/../data/wordnet.tct") if type == :tokyo && path == :default
+      @data_path = Pathname.new("#{File.dirname(__FILE__)}/../data/index.dmp") if type == :pure && path == :default
+      @connection_type = type
+      
+      if @data_path.exist?
+        if @connection_type == :tokyo
+          @connection = Rufus::Tokyo::Table.new(@data_path.to_s)
+          @connected = true
+        elsif @connection_type == :pure
+          # open the index is there
+          File.open(@data_path,'r') do |file|
+            @connection = Marshal.load file.read
+          end
+          # search for the wordnet files
+          if locate_wordnet?(wordnet_path)
+            @connected = true
+          else
+            @connected = false
+            raise "Failed to locate the wordnet database. Please ensure it is installed and that if it resides at a custom path that path is given as an argument when constructing the Words object."
+          end
+        else
+          @connected = false
+        end
+      else
+        @connected = false
+        raise "Failed to locate the words #{ @connection_type == :pure ? 'index' : 'dataset' } at #{@data_path}. Please insure you have created it using the words gems provided 'build_dataset.rb' command."
+      end
+      
     end
     
-    def self.wordnet_connection=(x)
-      @@wordnet_connection = x
+    def close
+      @connected = false
+      if @connected && connection_type == :tokyo
+        connection.close 
+      end
+      return true
+    end
+    
+    def lemma(term)
+      if connection_type == :pure
+        raw_lemma = @connection[term]
+        { 'lemma' => raw_lemma[0], 'tagsense_counts' => raw_lemma[1], 'synset_ids' => raw_lemma[2]}
+      else
+        @connection[term]
+      end
+    end
+    
+    def synset(synset_id)
+      if connection_type == :pure
+        pos = synset_id[0,1]      
+        File.open(@wordnet_dir + "data.#{SHORT_TO_POS_FILE_TYPE[pos]}","r") do |file|
+          file.seek(synset_id[1..-1].to_i)
+          data_line, gloss = file.readline.strip.split(" | ")
+          data_parts = data_line.split(" ")        
+          synset_id, lexical_filenum, synset_type, word_count = pos + data_parts.shift, data_parts.shift, data_parts.shift, data_parts.shift.to_i(16)
+          words = Array.new(word_count).map { "#{data_parts.shift}.#{data_parts.shift}" }
+          relations = Array.new(data_parts.shift.to_i).map { "#{data_parts.shift}.#{data_parts.shift}.#{data_parts.shift}.#{data_parts.shift}" }
+          { "synset_id" => synset_id, "lexical_filenum" => lexical_filenum, "synset_type" => synset_type, "words" => words.join('|'), "relations" => relations.join('|'), "gloss" => gloss.strip }          
+        end
+      else
+        @connection[synset_id]
+      end
+    end
+    
+    def locate_wordnet?(base_dirs)
+      
+      base_dirs = case base_dirs
+        when :search
+        ['/usr/share/wordnet', '/usr/local/share/wordnet', '/usr/local/WordNet-3.0']
+      else
+        [ base_dirs ] 
+      end
+      
+      base_dirs.each do |dir|
+        ["", "dict"].each do |sub_folder| 
+          path = Pathname.new(dir + sub_folder)
+          @wordnet_dir = path if (path + "data.noun").exist?
+          break if !@wordnet_dir.nil?
+        end
+      end
+      
+      return !@wordnet_dir.nil?
+      
     end
     
   end
@@ -29,7 +111,8 @@ module Words
                     "\\" => :pertainym, "<" => :participle_of_verb, "&" => :similar_to, "^" => :see_also }
     SYMBOL_TO_RELATION = RELATION_TO_SYMBOL.invert
     
-    def initialize(relation_construct, source_synset)
+    def initialize(relation_construct, source_synset, wordnet_connection)
+      @wordnet_connection = wordnet_connection
       @symbol, @dest_synset_id, @pos, @source_dest = relation_construct.split('.')
       @dest_synset_id = @pos + @dest_synset_id
       @symbol = RELATION_TO_SYMBOL[@symbol]
@@ -66,7 +149,7 @@ module Words
     end
     
     def destination
-      @destination = Synset.new(@dest_synset_id) unless defined? @destination
+      @destination = Synset.new @dest_synset_id, @wordnet_connection unless defined? @destination
       @destination
     end
     
@@ -86,8 +169,9 @@ module Words
     
     SYNSET_TYPE_TO_SYMBOL = {"n" => :noun, "v" => :verb, "a" => :adjective, "r" => :adverb, "s" => :adjective_satallite }
     
-    def initialize(synset_id)
-      @synset_hash = WordnetConnection::wordnet_connection[synset_id]
+    def initialize(synset_id, wordnet_connection)
+      @wordnet_connection = wordnet_connection
+      @synset_hash = wordnet_connection.synset(synset_id)
       # construct some conveniance menthods for relation type access
       Relation::SYMBOL_TO_RELATION.keys.each do |relation_type|
         self.class.send(:define_method, "#{relation_type}s?") do 
@@ -130,7 +214,7 @@ module Words
     end
     
     def relations(type = :all)
-      @relations = @synset_hash["relations"].split('|').map { |relation| Relation.new(relation, self) } unless defined? @relations
+      @relations = @synset_hash["relations"].split('|').map { |relation| Relation.new(relation, self, @wordnet_connection) } unless defined? @relations
       case 
         when Relation::SYMBOL_TO_RELATION.include?(type.to_sym)
         @relations.select { |relation| relation.relation_type == type.to_sym }
@@ -153,8 +237,9 @@ module Words
     POS_TO_SYMBOL = {"n" => :noun, "v" => :verb, "a" => :adjective, "r" => :adverb}
     SYMBOL_TO_POS = POS_TO_SYMBOL.invert
     
-    def initialize(lemma_hash)
-      @lemma_hash = lemma_hash
+    def initialize(raw_lemma, wordnet_connection)
+      @wordnet_connection = wordnet_connection
+      @lemma_hash = raw_lemma
       # construct some conveniance menthods for relation type access
       SYMBOL_TO_POS.keys.each do |pos|
         self.class.send(:define_method, "#{pos}s?") do 
@@ -163,7 +248,15 @@ module Words
         self.class.send(:define_method, "#{pos}s") do 
           synsets(pos)
         end
+        self.class.send(:define_method, "#{pos}_ids") do 
+          synset_ids(pos)
+        end
       end
+    end
+    
+    def tagsense_counts
+      @tagsense_counts = @lemma_hash["tagsense_counts"].split('|').map { |count| { POS_TO_SYMBOL[count[0,1]] => count[1..-1].to_i }  } unless defined? @tagsense_counts
+      @tagsense_counts
     end
     
     def lemma
@@ -182,20 +275,19 @@ module Words
     end
     
     def synsets(pos = :all)
-      relevent_synsets = case 
-        when SYMBOL_TO_POS.include?(pos.to_sym)
-        synset_ids.select { |synset_id| synset_id[0,1] == SYMBOL_TO_POS[pos.to_sym] }
-        when POS_TO_SYMBOL.include?(pos.to_s)
-        synset_ids.select { |synset_id| synset_id[0,1] == pos.to_s }
-      else
-        synset_ids
-      end
-      relevent_synsets.map { |synset_id| Synset.new synset_id }
+      synset_ids(pos).map { |synset_id| Synset.new synset_id, @wordnet_connection }
     end
     
-    def synset_ids
+    def synset_ids(pos = :all)
       @synset_ids = @lemma_hash["synset_ids"].split('|') unless defined? @synset_ids
-      @synset_ids
+      case 
+        when SYMBOL_TO_POS.include?(pos.to_sym)
+        @synset_ids.select { |synset_id| synset_id[0,1] == SYMBOL_TO_POS[pos.to_sym] }
+        when POS_TO_SYMBOL.include?(pos.to_s)
+        @synset_ids.select { |synset_id| synset_id[0,1] == pos.to_s }
+      else
+        @synset_ids
+      end
     end
     
     def inspect
@@ -203,25 +295,42 @@ module Words
     end
     
     alias word lemma
+    alias pos available_pos
     
   end
   
   class Words
     
-    def initialize(path = 'data/wordnet.tct')
-      if (Pathname.new path).exist?
-        WordnetConnection::wordnet_connection = Rufus::Tokyo::Table.new(path)
-      else
-        abort("Failed to locate the words database at #{(Pathname.new path).realpath}")
-      end
+    @wordnet_connection = nil
+    
+    def initialize(type = :tokyo, path = :default, wordnet_path = :search)
+      @wordnet_connection = WordnetConnection.new(type, path, wordnet_path)
     end
     
     def find(word)
-      Lemma.new WordnetConnection::wordnet_connection[word]
+      Lemma.new  @wordnet_connection.lemma(word), @wordnet_connection
+    end
+    
+    def connection_type
+      @wordnet_connection.connection_type
+    end
+    
+    def wordnet_dir
+      @wordnet_connection.wordnet_dir
     end
     
     def close
-      WordnetConnection::wordnet_connection.close
+      @wordnet_connection.close
+    end
+    
+    def connected
+      @wordnet_connection.connected
+    end
+    
+    def to_s
+      return "Words not connected" if !connected
+      return "Words running in pure mode using wordnet files found at #{wordnet_dir} and index at #{@wordnet_connection.data_path}" if connection_type == :pure
+      return "Words running in tokyo mode with dataset at #{@wordnet_connection.data_path}" if connection_type == :tokyo
     end
     
   end

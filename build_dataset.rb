@@ -29,7 +29,7 @@ if __FILE__ == $0
     opt :build_tokyo, "Build the tokyo dataset?", :default => false
     opt :build_pure, "Build the pure ruby dataset?", :default => false
   end
-  Trollop::die :build_tokyo, "Either tokyo dataset or pure ruby dataset are required".red if !opts[:build_tokyo] && !opts[:build_pure]
+  Trollop::die :build_tokyo, "Either tokyo dataset or pure ruby dataset are required" if !opts[:build_tokyo] && !opts[:build_pure]
   puts "Verbose mode enabled" if (VERBOSE = opts[:verbose])
   
   wordnet_dir = nil
@@ -59,7 +59,8 @@ if __FILE__ == $0
   
   # Build data
   
-  hash = Rufus::Tokyo::Table.new("data/wordnet.tct")
+  index_hash = Hash.new
+  data_hash = Hash.new
   POS_FILE_TYPES.each do |file_pos|
     
     puts "Building #{file_pos} indexes..." if VERBOSE
@@ -75,30 +76,45 @@ if __FILE__ == $0
       tagsense_count = pos + index_parts.shift
       synset_ids = Array.new(synset_count).map { POS_FILE_TYPE_TO_SHORT[file_pos] + index_parts.shift }
       
-      hash[lemma] = { "synset_ids" => '', "tagsense_counts" => '' } if hash[lemma].nil?
+      index_hash[lemma] = { "synset_ids" => [], "tagsense_counts" => [] } if index_hash[lemma].nil?
+      index_hash[lemma] = { "lemma" => lemma, "synset_ids" => index_hash[lemma]["synset_ids"] + synset_ids, "tagsense_counts" => index_hash[lemma]["tagsense_counts"] + [tagsense_count] }
       
-      hash[lemma] = { "lemma" => lemma, "synset_ids" => (hash[lemma]["synset_ids"].split('|') + synset_ids).join('|'), # append synsets 
-                      "tagsense_counts" => (hash[lemma]["tagsense_counts"].split('|') << tagsense_count).join('|') } # append pointer symbols
     end
     
-    puts "Adding #{file_pos} data..." if VERBOSE
-    
-    # add data
-     (wordnet_dir + "data.#{file_pos}").each_line do |data_line|
-      next if data_line[0, 2] == "  "
-      data_line, gloss = data_line.split(" | ")
-      data_parts = data_line.split(" ")
+    if opts[:build_tokyo]
+      puts "Building #{file_pos} data..." if VERBOSE
       
-      synset_id, lexical_filenum, synset_type, word_count = POS_FILE_TYPE_TO_SHORT[file_pos] + data_parts.shift, data_parts.shift, data_parts.shift, data_parts.shift.to_i(16)
-      words = Array.new(word_count).map { "#{data_parts.shift}.#{data_parts.shift}" }
-      relations = Array.new(data_parts.shift.to_i).map { "#{data_parts.shift}.#{data_parts.shift}.#{data_parts.shift}.#{data_parts.shift}" }
-      
-      hash[synset_id] = { "synset_id" => synset_id, "lexical_filenum" => lexical_filenum, "synset_type" => synset_type, 
-                          "words" => words.join('|'), "relations" => relations.join('|'), "gloss" => gloss }
+      # add data
+       (wordnet_dir + "data.#{file_pos}").each_line do |data_line|
+        next if data_line[0, 2] == "  "
+        data_line, gloss = data_line.split(" | ")
+        data_parts = data_line.split(" ")
+        
+        synset_id, lexical_filenum, synset_type, word_count = POS_FILE_TYPE_TO_SHORT[file_pos] + data_parts.shift, data_parts.shift, data_parts.shift, data_parts.shift.to_i(16)
+        words = Array.new(word_count).map { "#{data_parts.shift}.#{data_parts.shift}" }
+        relations = Array.new(data_parts.shift.to_i).map { "#{data_parts.shift}.#{data_parts.shift}.#{data_parts.shift}.#{data_parts.shift}" }
+        
+        data_hash[synset_id] = { "synset_id" => synset_id, "lexical_filenum" => lexical_filenum, "synset_type" => synset_type, 
+                          "words" => words.join('|'), "relations" => relations.join('|'), "gloss" => gloss.strip }
+      end
     end
-    
     
   end
-  hash.close
+  
+  if opts[:build_tokyo]
+    tokyo_hash = Rufus::Tokyo::Table.new("#{File.dirname(__FILE__)}/data/wordnet.tct")
+    index_hash.each { |k,v| tokyo_hash[k] = { "lemma" => v["lemma"], "synset_ids" => v["synset_ids"].join('|'), "tagsense_counts" => v["tagsense_counts"].join('|') } }
+    data_hash.each { |k,v| tokyo_hash[k] = v }
+    tokyo_hash.close
+  end
+  
+  if opts[:build_pure]
+    index = Hash.new
+    index_hash.each { |k,v| index[k] = [v["lemma"], v["tagsense_counts"].join('|'), v["synset_ids"].join('|')] }
+    File.open("#{File.dirname(__FILE__)}/data/index.dmp",'w') do |file|
+      file.write Marshal.dump(index)
+    end
+  end
+  
   
 end
