@@ -14,8 +14,12 @@ begin
     gem.add_dependency 'rufus-tokyo', '>= 1.0.5'
     gem.executables = [ "build_wordnet" ]
     gem.default_executable = "build_wordnet"
+    gem.rubyforge_project = 'words'
   end
   Jeweler::GemcutterTasks.new
+  Jeweler::RubyforgeTasks.new do |rubyforge|
+    rubyforge.doc_task = "rdoc"
+  end
 rescue LoadError
   puts "Jeweler (or a dependency) not available. Install it with: gem install jeweler"
 end
