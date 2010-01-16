@@ -26,7 +26,10 @@ if __FILE__ == $0
   puts wordnet.find('bat').synsets('verb').last.inspect
   puts wordnet.find('bat').synsets('verb').last.words
   puts wordnet.find('bat').synsets('verb').last.words_with_num.inspect
-      
+  
+  puts wordnet.find('bat').synsets('verb').first.lexical.inspect
+  puts wordnet.find('bat').synsets('verb').first.lexical_description
+  
   wordnet.close
   
 end
