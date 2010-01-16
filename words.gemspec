@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.authors = ["Roja Buck"]
   s.date = %q{2010-01-16}
   s.default_executable = %q{build_wordnet}
-  s.description = %q{Words implements a fast interface to Wordnet® (http://wordnet.princeton.edu) which provides both a pure ruby and an FFI powered backend over the same easy-to-use API. The FFI backend makes use of Tokyo Cabinet and the FFI interface, rufus-tokyo, to provide cross ruby distribution compatability and blistering speed. The pure ruby interface operates on a special ruby optimised index along with the basic dictionary files provided by WordNet®. I have attempted to provide ease of use in the form of a simple yet powerful api and installation is a sintch!}
+  s.description = %q{Words, with both pure ruby & tokyo-cabinate backends, implements a fast interface to Wordnet® over the same easy-to-use API. The FFI backend makes use of Tokyo Cabinet and the FFI interface, rufus-tokyo, to provide cross ruby distribution compatability and blistering speed. The pure ruby interface operates on a special ruby optimised index along with the basic dictionary files provided by WordNet®. I have attempted to provide ease of use in the form of a simple yet powerful api and installation is a sintch!}
   s.email = %q{roja@arbia.co.uk}
   s.executables = ["build_wordnet"]
   s.extra_rdoc_files = [
