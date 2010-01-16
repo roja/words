@@ -6,7 +6,7 @@ begin
   Jeweler::Tasks.new do |gem|
     gem.name = "words"
     gem.summary = %Q{A Fast & Easy to use interface to WordNet® with cross ruby distribution compatability.}
-    gem.description = %Q{Words implements a fast interface to Wordnet® (http://wordnet.princeton.edu) which provides both a pure ruby and an FFI powered backend over the same easy-to-use API. The FFI backend makes use of Tokyo Cabinet and the FFI interface, rufus-tokyo, to provide cross ruby distribution compatability and blistering speed. The pure ruby interface operates on a special ruby optimised index along with the basic dictionary files provided by WordNet®. I have attempted to provide ease of use in the form of a simple yet powerful api and installation is a sintch!}
+    gem.description = %Q{Words, with both pure ruby & tokyo-cabinate backends, implements a fast interface to Wordnet® over the same easy-to-use API. The FFI backend makes use of Tokyo Cabinet and the FFI interface, rufus-tokyo, to provide cross ruby distribution compatability and blistering speed. The pure ruby interface operates on a special ruby optimised index along with the basic dictionary files provided by WordNet®. I have attempted to provide ease of use in the form of a simple yet powerful api and installation is a sintch!}
     gem.email = "roja@arbia.co.uk"
     gem.homepage = "http://github.com/roja/words"
     gem.authors = ["Roja Buck"]
