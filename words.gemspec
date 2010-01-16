@@ -34,6 +34,7 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://github.com/roja/words}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
+  s.rubyforge_project = %q{words}
   s.rubygems_version = %q{1.3.5}
   s.summary = %q{A Fast & Easy to use interface to WordNet® with cross ruby distribution compatability.}
   s.test_files = [
