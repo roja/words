@@ -248,13 +248,13 @@ module Words
       words.size
     end
     
-    def words_with_lex_ids
+    def words_with_lexical_ids
       @words_with_num = @synset_hash["words"].split('|').map { |word| word_parts = word.split('.'); { :word => word_parts[0].gsub('_', ' '), :lexical_id => word_parts[1] } } unless defined? @words_with_num
       @words_with_num
     end
     
     def lexical_filenum
-      @synset_hash["lexical_filenum"].to_i
+      @synset_hash["lexical_filenum"]
     end
     
     def lexical_catagory
@@ -266,7 +266,7 @@ module Words
     end
     
     def lexical
-      NUM_TO_LEX[@synset_hash["lexical_filenum"].to_i]
+      NUM_TO_LEX[lexical_filenum.to_i]
     end
     
     def synset_id
@@ -319,10 +319,13 @@ module Words
       # construct some conveniance menthods for relation type access
       SYMBOL_TO_POS.keys.each do |pos|
         self.class.send(:define_method, "#{pos}s?") do 
-          synsets(pos).size > 0
+          size(pos) > 0
         end
         self.class.send(:define_method, "#{pos}s") do 
           synsets(pos)
+        end
+        self.class.send(:define_method, "#{pos}_count") do 
+          size(pos)
         end
         self.class.send(:define_method, "#{pos}_ids") do 
           synset_ids(pos)
@@ -348,6 +351,10 @@ module Words
     def to_s
       @to_s = [lemma, " " + available_pos.join("/")].join(",") unless defined? @to_s
       @to_s
+    end
+    
+    def size(pos = :all)
+      synset_ids(pos).size
     end
     
     def synsets(pos = :all)
