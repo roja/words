@@ -53,10 +53,10 @@ module Words
       return true
     end
     
-    def lemma(term)
+    def homographs(term)
       if connection_type == :pure
-        raw_lemma = @connection[term]
-        { 'lemma' => raw_lemma[0], 'tagsense_counts' => raw_lemma[1], 'synset_ids' => raw_lemma[2]}
+        raw_homographs = @connection[term]
+        { 'lemma' => raw_homographs[0], 'tagsense_counts' => raw_homographs[1], 'synset_ids' => raw_homographs[2]}
       else
         @connection[term]
       end
@@ -168,6 +168,7 @@ module Words
   class Synset
     
     SYNSET_TYPE_TO_SYMBOL = {"n" => :noun, "v" => :verb, "a" => :adjective, "r" => :adverb, "s" => :adjective_satallite }
+    SYNSET_TYPE_TO_NUMBER = { "n" => 1, "v" => 2, "a" => 3, "r" => 4, "s" => 5 }
     NUM_TO_LEX = [ { :lex => :adj_all, :description => "all adjective clusters" },
     { :lex => :adj_pert, :description => "relational adjectives (pertainyms)" },
     { :lex => :adv_all, :description => "all adverbs" },
@@ -214,9 +215,10 @@ module Words
     { :lex => :verb_weather, :description => "verbs of raining, snowing, thawing, thundering" },
     { :lex => :adj_ppl, :description => "participial adjectives" } ]
     
-    def initialize(synset_id, wordnet_connection)
+    def initialize(synset_id, wordnet_connection, homographs)
       @wordnet_connection = wordnet_connection
       @synset_hash = wordnet_connection.synset(synset_id)
+      @homographs = homographs
       # construct some conveniance menthods for relation type access
       Relation::SYMBOL_TO_RELATION.keys.each do |relation_type|
         self.class.send(:define_method, "#{relation_type}s?") do 
@@ -237,12 +239,17 @@ module Words
       @words
     end
     
+    def lexical_ids
+      @words = words_with_num.map { |word_with_num| word_with_num[:lexical_id] } unless defined? @words
+      @words
+    end
+    
     def size
       words.size
     end
     
-    def words_with_num
-      @words_with_num = @synset_hash["words"].split('|').map { |word| word_parts = word.split('.'); { :word => word_parts[0].gsub('_', ' '), :num => word_parts[1] } } unless defined? @words_with_num
+    def words_with_lex_ids
+      @words_with_num = @synset_hash["words"].split('|').map { |word| word_parts = word.split('.'); { :word => word_parts[0].gsub('_', ' '), :lexical_id => word_parts[1] } } unless defined? @words_with_num
       @words_with_num
     end
     
@@ -270,6 +277,14 @@ module Words
       @synset_hash["gloss"]
     end
     
+    def lemma
+      @homographs.lemma
+    end
+    
+    def homographs
+      @homographs
+    end
+    
     def inspect
       @synset_hash.inspect
     end
@@ -293,14 +308,14 @@ module Words
     
   end
   
-  class Lemma
+  class Homographs
     
     POS_TO_SYMBOL = {"n" => :noun, "v" => :verb, "a" => :adjective, "r" => :adverb}
     SYMBOL_TO_POS = POS_TO_SYMBOL.invert
     
-    def initialize(raw_lemma, wordnet_connection)
+    def initialize(raw_homographs, wordnet_connection)
       @wordnet_connection = wordnet_connection
-      @lemma_hash = raw_lemma
+      @lemma_hash = raw_homographs
       # construct some conveniance menthods for relation type access
       SYMBOL_TO_POS.keys.each do |pos|
         self.class.send(:define_method, "#{pos}s?") do 
@@ -316,12 +331,12 @@ module Words
     end
     
     def tagsense_counts
-      @tagsense_counts = @lemma_hash["tagsense_counts"].split('|').map { |count| { POS_TO_SYMBOL[count[0,1]] => count[1..-1].to_i }  } unless defined? @tagsense_counts
+      @tagsense_counts = @raw_homographs["tagsense_counts"].split('|').map { |count| { POS_TO_SYMBOL[count[0,1]] => count[1..-1].to_i }  } unless defined? @tagsense_counts
       @tagsense_counts
     end
     
     def lemma
-      @lemma = @lemma_hash["lemma"].gsub('_', ' ') unless defined? @lemma
+      @lemma = @raw_homographs["lemma"].gsub('_', ' ') unless defined? @lemma
       @lemma
     end
     
@@ -336,11 +351,11 @@ module Words
     end
     
     def synsets(pos = :all)
-      synset_ids(pos).map { |synset_id| Synset.new synset_id, @wordnet_connection }
+      synset_ids(pos).map { |synset_id| Synset.new synset_id, self, @wordnet_connection }
     end
     
     def synset_ids(pos = :all)
-      @synset_ids = @lemma_hash["synset_ids"].split('|') unless defined? @synset_ids
+      @synset_ids = @raw_homographs["synset_ids"].split('|') unless defined? @synset_ids
       case 
         when SYMBOL_TO_POS.include?(pos.to_sym)
         @synset_ids.select { |synset_id| synset_id[0,1] == SYMBOL_TO_POS[pos.to_sym] }
@@ -352,11 +367,13 @@ module Words
     end
     
     def inspect
-      @lemma_hash.inspect
+      @raw_homographs.inspect
     end
     
     alias word lemma
     alias pos available_pos
+    alias senses synsets
+    alias sense_ids synset_ids
     
   end
   
@@ -369,7 +386,7 @@ module Words
     end
     
     def find(word)
-      Lemma.new  @wordnet_connection.lemma(word), @wordnet_connection
+      Homographs.new  @wordnet_connection.homographs(word), @wordnet_connection
     end
     
     def connection_type
