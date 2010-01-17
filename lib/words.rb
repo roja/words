@@ -40,7 +40,7 @@ module Words
         end
       else
         @connected = false
-        raise "Failed to locate the words #{ @connection_type == :pure ? 'index' : 'dataset' } at #{@data_path}. Please insure you have created it using the words gems provided 'build_dataset.rb' command."
+        raise "Failed to locate the words #{ @connection_type == :pure ? 'index' : 'dataset' } at #{@data_path}. Please insure you have created it using the words gems provided 'build_wordnet' command."
       end
       
     end
