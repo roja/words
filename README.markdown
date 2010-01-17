@@ -4,6 +4,8 @@
 
 Words implements a fast interface to [Wordnet®](http://wordnet.princeton.edu) which provides both a pure ruby and an FFI powered backend over the same easy-to-use API. The FFI backend makes use of [Tokyo Cabinet](http://1978th.net/tokyocabinet/) and the FFI interface, [rufus-tokyo](http://github.com/jmettraux/rufus-tokyo), to provide cross ruby distribution compatability and blistering speed. The pure ruby interface operates on a special ruby optimised index along with the basic dictionary files provided by WordNet®. I have attempted to provide ease of use in the form of a simple yet powerful api and installation is a sintch!
 
+Version 0.3 Introduced Evocation Support (see examples & below) as developed by the [Wordnet® Evocation Project](http://wordnet.cs.princeton.edu/downloads/evocation/release-0.4/README.TXT) 
+
 ## Pre-Installation ##
 
 First ensure you have a copy of the wordnet data files. This is generally available from your Linux/OSX package manager:
@@ -55,13 +57,16 @@ Then your ready to rock and roll. :)
 
 To build the wordnet dataset (or index for pure) file yourself, from the original wordnet files, you can use the bundled "build_wordnet" command
 
-	build_wordnet -h # this will give you the usage information
+	build_wordnet -h # this will give you the usage information & additional options/features
 	
 	# this would attempt to build the tokyo backend data locating the original wordnet files through a search...
 	sudo build_wordnet -v --build-tokyo
 	
 	# this would attempt to build the pure backend index locating the original wordnet files through a search...
 	sudo build_wordnet -v --build-pure
+	
+	# this would attempt to build the tokyo backend index as above but also builds the evocations information into the dataset
+	sudo build_wordnet -v --build-pure --build-evocations
 
 ## Usage ##
 
@@ -106,6 +111,9 @@ Heres a few little examples of using words within your programs.
     sense.derivationally_related_forms.first.source_word # => "bat"
     sense.derivationally_related_forms.first.destination_word # => "bat"
     sense.derivationally_related_forms.first.destination # => the synset of v01413191
+    
+    data.find("broadcast").senses.first.evocations # => sense relevant evocations
+    data.find("broadcast").senses.first.evocations[1] # => the evocation at index 1
     
 These and more examples are available from within the examples.rb file!        
 
