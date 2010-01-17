@@ -26,10 +26,15 @@ if __FILE__ == $0
   puts wordnet.find('bat').synsets('noun').last.relations("~")
   puts wordnet.find('bat').synsets('verb').last.inspect
   puts wordnet.find('bat').synsets('verb').last.words
-  puts wordnet.find('bat').synsets('verb').last.words_with_num.inspect
+  puts wordnet.find('bat').synsets('verb').last.words_with_lexical_ids.inspect
   
   puts wordnet.find('bat').synsets('verb').first.lexical.inspect
   puts wordnet.find('bat').synsets('verb').first.lexical_description
+  
+  puts wordnet.find('jkashdfajkshfksjdhf')
+  
+  puts wordnet.find("broadcast").senses.first.evocations
+  puts wordnet.find("broadcast").senses.first.evocations[1].inspect
   
   wordnet.close
   

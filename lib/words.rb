@@ -25,9 +25,13 @@ module Words
           @connected = true
         elsif @connection_type == :pure
           # open the index is there
-          File.open(@data_path,'r') do |file|
+          File.open(@data_path, 'r') do |file|
             @connection = Marshal.load file.read
           end
+          evocation_path = Pathname.new("#{File.dirname(__FILE__)}/../data/evocations.dmp")
+          File.open(evocation_path, 'r') do |file|
+            @evocations = Marshal.load file.read
+          end if evocation_path.exist?
           # search for the wordnet files
           if locate_wordnet?(wordnet_path)
             @connected = true
@@ -56,9 +60,22 @@ module Words
     def homographs(term)
       if connection_type == :pure
         raw_homographs = @connection[term]
-        { 'lemma' => raw_homographs[0], 'tagsense_counts' => raw_homographs[1], 'synset_ids' => raw_homographs[2]}
+        { 'lemma' => raw_homographs[0], 'tagsense_counts' => raw_homographs[1], 'synset_ids' => raw_homographs[2]} unless raw_homographs.nil?
       else
         @connection[term]
+      end
+    end
+    
+    def evocations(senset_id)
+      if connection_type == :pure
+        if defined? @evocations
+          raw_evocations = @evocations[senset_id + "s"]
+          { 'relations' => raw_evocations[0], 'means' => raw_evocations[1], 'medians' => raw_evocations[2]} unless raw_evocations.nil?
+        else
+          nil
+        end
+      else
+        @connection[senset_id + "s"]
       end
     end
     
@@ -98,6 +115,62 @@ module Words
       
       return !@wordnet_dir.nil?
       
+    end
+    
+  end
+  
+  class Evocations
+    
+    def initialize(evocation_construct, source_synset, wordnet_connection)
+      @wordnet_connection = wordnet_connection
+      @source = source_synset
+      @evocation_construct = evocation_construct
+    end
+    
+    def means
+      @means = @evocation_construct["means"].split('|') unless defined? @means
+      @means
+    end
+    
+    def medians
+      @medians = @evocation_construct["medians"].split('|') unless defined? @medians
+      @medians
+    end
+    
+    def size
+      means.size
+    end
+    
+    def first
+      self[0]
+    end
+    
+    def last
+      self[size-1]
+    end
+    
+    def [] (index)
+      { :destination => destinations[index], :mean => means[index], :median => medians[index] }
+    end
+    
+    def destinations(pos = :all)
+      destination_ids(pos).map { |synset_id| Synset.new synset_id, @wordnet_connection, @source.homographs }
+    end
+    
+    def destination_ids(pos = :all)
+      @destination_ids = @evocation_construct["relations"].split('|') unless defined? @destination_ids
+      case 
+        when Homographs::SYMBOL_TO_POS.include?(pos.to_sym)
+        @destination_ids.select { |synset_id| synset_id[0,1] == Homographs::SYMBOL_TO_POS[pos.to_sym] }
+        when Homographs::POS_TO_SYMBOL.include?(pos.to_s)
+        @destination_ids.select { |synset_id| synset_id[0,1] == pos.to_s }
+      else
+        @destination_ids
+      end
+    end
+    
+    def to_s
+      "#{size} evocations from #{@source}"
     end
     
   end
@@ -149,7 +222,7 @@ module Words
     end
     
     def destination
-      @destination = Synset.new @dest_synset_id, @wordnet_connection unless defined? @destination
+      @destination = Synset.new(@dest_synset_id, @wordnet_connection, nil) unless defined? @destination
       @destination
     end
     
@@ -235,12 +308,12 @@ module Words
     end
     
     def words
-      @words = words_with_num.map { |word_with_num| word_with_num[:word] } unless defined? @words
+      @words = words_with_lexical_ids.map { |word_with_num| word_with_num[:word] } unless defined? @words
       @words
     end
     
     def lexical_ids
-      @words = words_with_num.map { |word_with_num| word_with_num[:lexical_id] } unless defined? @words
+      @words = words_with_lexical_ids.map { |word_with_num| word_with_num[:lexical_id] } unless defined? @words
       @words
     end
     
@@ -301,6 +374,11 @@ module Words
       end
     end
     
+    def evocations
+      evocations_arr = @wordnet_connection.evocations(synset_id)
+      Evocations.new evocations_arr, self, @wordnet_connection unless evocations_arr.nil?
+    end
+    
     def to_s
       @to_s = "#{synset_type.to_s.capitalize} including word(s): #{words.map { |word| '"' + word + '"' }.join(', ')} meaning: #{gloss}" unless defined? @to_s
       @to_s
@@ -315,7 +393,7 @@ module Words
     
     def initialize(raw_homographs, wordnet_connection)
       @wordnet_connection = wordnet_connection
-      @lemma_hash = raw_homographs
+      @raw_homographs = raw_homographs
       # construct some conveniance menthods for relation type access
       SYMBOL_TO_POS.keys.each do |pos|
         self.class.send(:define_method, "#{pos}s?") do 
@@ -358,7 +436,7 @@ module Words
     end
     
     def synsets(pos = :all)
-      synset_ids(pos).map { |synset_id| Synset.new synset_id, self, @wordnet_connection }
+      synset_ids(pos).map { |synset_id| Synset.new synset_id, @wordnet_connection, self }
     end
     
     def synset_ids(pos = :all)
@@ -393,7 +471,8 @@ module Words
     end
     
     def find(word)
-      Homographs.new  @wordnet_connection.homographs(word), @wordnet_connection
+      homographs = @wordnet_connection.homographs(word)
+      Homographs.new  homographs, @wordnet_connection unless homographs.nil?
     end
     
     def connection_type
