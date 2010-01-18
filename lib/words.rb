@@ -4,7 +4,7 @@ require 'set'
 
 # gem includes
 require 'rubygems'
-require 'rufus-tokyo'
+require 'rufus-tokyo' if Gem.available?('rufus-tokyo')
 
 module Words
   
@@ -21,6 +21,7 @@ module Words
       
       if @data_path.exist?
         if @connection_type == :tokyo
+          raise "Coulden't find the rufus-tokyo gem. Please ensure it's installed." unless Gem.available?('rufus-tokyo')
           @connection = Rufus::Tokyo::Table.new(@data_path.to_s, :mode => 'r')
           @connected = true
         elsif @connection_type == :pure
