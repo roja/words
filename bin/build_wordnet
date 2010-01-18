@@ -6,7 +6,6 @@ require 'pathname'
 # gem includes
 require 'rubygems'
 require 'trollop'
-require 'rufus-tokyo'
 require 'zlib'
 require 'net/http'
 
@@ -32,6 +31,8 @@ opts = Trollop::options do
 end
 Trollop::die :build_tokyo, "You need to specify whether tokyo dataset or pure ruby index building is required" if !opts[:build_tokyo] && !opts[:build_pure]
 puts "Verbose mode enabled" if (VERBOSE = opts[:verbose])
+
+require 'rufus-tokyo' if opts[:build_tokyo]
 
 gem_path = Pathname.new "#{File.dirname(__FILE__)}/.."
 abort "Ensure you run the command using sudo or as a Superuser / Administrator" unless gem_path.writable?

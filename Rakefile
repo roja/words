@@ -11,7 +11,6 @@ begin
     gem.homepage = "http://github.com/roja/words"
     gem.authors = ["Roja Buck"]
     gem.add_dependency "trollop", ">= 1.15"
-    gem.add_dependency 'rufus-tokyo', '>= 1.0.5'
     gem.executables = [ "build_wordnet" ]
     gem.default_executable = "build_wordnet"
     gem.rubyforge_project = 'words'

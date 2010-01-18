@@ -384,6 +384,8 @@ module Words
       @to_s
     end
     
+    alias word lemma
+    
   end
   
   class Homographs
