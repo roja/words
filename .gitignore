@@ -18,9 +18,7 @@ coverage
 rdoc
 pkg
 
-## ECLIPSE
-.loadpath
-.project
-.document
+## Netbeans
+nbproject
 
 ## PROJECT::SPECIFIC
