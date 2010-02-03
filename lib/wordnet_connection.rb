@@ -53,15 +53,20 @@ module Words
     end
 
     def close
+
       @connected = false
       if @connected && connection_type == :tokyo
         connection.close
       end
+
       return true
+
     end
 
     def evocations_enabled?
+
       !evocations('v00973074').nil?
+
     end
 
     def pure_homograph(term, use_cache = true)
@@ -98,7 +103,9 @@ module Words
     end
 
     def homographs(term)
+
       return nil unless @connected
+
       if connection_type == :pure
         lemma, *raw_homographs = pure_homograph(term)
         unless raw_homographs.empty?
@@ -114,10 +121,13 @@ module Words
       else
         @connection[term]
       end
+
     end
 
     def evocations(senset_id)
+
       return nil unless @connected
+
       if connection_type == :pure
         if defined? @evocations
           raw_evocations = @evocations[senset_id + "s"]
@@ -128,10 +138,13 @@ module Words
       else
         @connection[senset_id + "s"]
       end
+
     end
 
     def synset(synset_id)
+
       return nil unless @connected
+
       if connection_type == :pure
         pos = synset_id[0,1]
         File.open(@wordnet_dir + "data.#{SHORT_TO_POS_FILE_TYPE[pos]}","r") do |file|
@@ -145,6 +158,7 @@ module Words
       else
         @connection[synset_id]
       end
+
     end
 
     def locate_wordnet?(base_dirs)

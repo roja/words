@@ -54,9 +54,11 @@ module Words
       { :lex => :adj_ppl, :description => "participial adjectives" } ]
 
     def initialize(synset_id, wordnet_connection, homographs)
+
       @wordnet_connection = wordnet_connection
       @synset_hash = wordnet_connection.synset(synset_id)
       @homographs = homographs
+
       # construct some conveniance menthods for relation type access
       Relation::SYMBOL_TO_RELATION.keys.each do |relation_type|
         self.class.send(:define_method, "#{relation_type}s?") do
@@ -66,69 +68,103 @@ module Words
           relations(relation_type)
         end
       end
+
     end
 
     def synset_type
+
       SYNSET_TYPE_TO_SYMBOL[@synset_hash["synset_type"]]
+
     end
 
     def words
+
       @words ||= words_with_lexical_ids.map { |word_with_num| word_with_num[:word] }
+
       @words
+
     end
 
     def lexical_ids
+
       @words ||= words_with_lexical_ids.map { |word_with_num| word_with_num[:lexical_id] }
+
       @words
+
     end
 
     def size
+
       words.size
+
     end
 
     def words_with_lexical_ids
+
       @words_with_num ||= @synset_hash["words"].split('|').map { |word| word_parts = word.split('.'); { :word => word_parts[0].gsub('_', ' '), :lexical_id => word_parts[1] } }
+
       @words_with_num
+
     end
 
     def lexical_filenum
+
       @synset_hash["lexical_filenum"]
+
     end
 
     def lexical_catagory
+
       lexical[:lex]
+
     end
 
     def lexical_description
+
       lexical[:description]
+
     end
 
     def lexical
+
       NUM_TO_LEX[lexical_filenum.to_i]
+
     end
 
     def synset_id
+
       @synset_hash["synset_id"]
+
     end
 
     def gloss
+
       @synset_hash["gloss"]
+
     end
 
     def lemma
+
       @homographs.lemma
+
     end
 
     def homographs
+
       @homographs
+
     end
 
     def inspect
+
       @synset_hash.inspect
+
     end
 
     def relations(type = :all)
+
       @relations ||= @synset_hash["relations"].split('|').map { |relation| Relation.new(relation, self, @wordnet_connection) }
+
       case
       when Relation::SYMBOL_TO_RELATION.include?(type.to_sym)
         @relations.select { |relation| relation.relation_type == type.to_sym }
@@ -137,16 +173,22 @@ module Words
       else
         @relations
       end
+
     end
 
     def evocations
+      
       evocations_arr = @wordnet_connection.evocations(synset_id)
       Evocations.new evocations_arr, self, @wordnet_connection unless evocations_arr.nil?
+
     end
 
     def to_s
+
       @to_s ||= "#{synset_type.to_s.capitalize} including word(s): #{words.map { |word| '"' + word + '"' }.join(', ')} meaning: #{gloss}"
+
       @to_s
+
     end
 
     alias word lemma
