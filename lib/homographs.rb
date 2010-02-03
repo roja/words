@@ -28,22 +28,22 @@ module Words
     end
 
     def tagsense_counts
-      @tagsense_counts = @raw_homographs["tagsense_counts"].split('|').map { |count| { POS_TO_SYMBOL[count[0,1]] => count[1..-1].to_i }  } unless defined? @tagsense_counts
+      @tagsense_counts ||= @raw_homographs["tagsense_counts"].split('|').map { |count| { POS_TO_SYMBOL[count[0,1]] => count[1..-1].to_i }  }
       @tagsense_counts
     end
 
     def lemma
-      @lemma = @raw_homographs["lemma"].gsub('_', ' ') unless defined? @lemma
+      @lemma ||= @raw_homographs["lemma"].gsub('_', ' ')
       @lemma
     end
 
     def available_pos
-      @available_pos = synset_ids.map { |synset_id| POS_TO_SYMBOL[synset_id[0,1]] }.uniq unless defined? @available_pos
+      @available_pos ||= synset_ids.map { |synset_id| POS_TO_SYMBOL[synset_id[0,1]] }.uniq
       @available_pos
     end
 
     def to_s
-      @to_s = [lemma, " " + available_pos.join("/")].join(",") unless defined? @to_s
+      @to_s ||= [lemma, " " + available_pos.join("/")].join(",")
       @to_s
     end
 
@@ -56,7 +56,7 @@ module Words
     end
 
     def synset_ids(pos = :all)
-      @synset_ids = @raw_homographs["synset_ids"].split('|') unless defined? @synset_ids
+      @synset_ids ||= @raw_homographs["synset_ids"].split('|')
       case
       when SYMBOL_TO_POS.include?(pos.to_sym)
         @synset_ids.select { |synset_id| synset_id[0,1] == SYMBOL_TO_POS[pos.to_sym] }

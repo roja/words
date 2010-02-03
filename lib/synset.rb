@@ -73,12 +73,12 @@ module Words
     end
 
     def words
-      @words = words_with_lexical_ids.map { |word_with_num| word_with_num[:word] } unless defined? @words
+      @words ||= words_with_lexical_ids.map { |word_with_num| word_with_num[:word] }
       @words
     end
 
     def lexical_ids
-      @words = words_with_lexical_ids.map { |word_with_num| word_with_num[:lexical_id] } unless defined? @words
+      @words ||= words_with_lexical_ids.map { |word_with_num| word_with_num[:lexical_id] }
       @words
     end
 
@@ -87,7 +87,7 @@ module Words
     end
 
     def words_with_lexical_ids
-      @words_with_num = @synset_hash["words"].split('|').map { |word| word_parts = word.split('.'); { :word => word_parts[0].gsub('_', ' '), :lexical_id => word_parts[1] } } unless defined? @words_with_num
+      @words_with_num ||= @synset_hash["words"].split('|').map { |word| word_parts = word.split('.'); { :word => word_parts[0].gsub('_', ' '), :lexical_id => word_parts[1] } }
       @words_with_num
     end
 
@@ -128,7 +128,7 @@ module Words
     end
 
     def relations(type = :all)
-      @relations = @synset_hash["relations"].split('|').map { |relation| Relation.new(relation, self, @wordnet_connection) } unless defined? @relations
+      @relations ||= @synset_hash["relations"].split('|').map { |relation| Relation.new(relation, self, @wordnet_connection) }
       case
       when Relation::SYMBOL_TO_RELATION.include?(type.to_sym)
         @relations.select { |relation| relation.relation_type == type.to_sym }
@@ -145,7 +145,7 @@ module Words
     end
 
     def to_s
-      @to_s = "#{synset_type.to_s.capitalize} including word(s): #{words.map { |word| '"' + word + '"' }.join(', ')} meaning: #{gloss}" unless defined? @to_s
+      @to_s ||= "#{synset_type.to_s.capitalize} including word(s): #{words.map { |word| '"' + word + '"' }.join(', ')} meaning: #{gloss}"
       @to_s
     end
 

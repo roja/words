@@ -7,7 +7,7 @@ module Words
     
     @wordnet_connection = nil
     
-    def initialize(type = :tokyo, path = :default, wordnet_path = :search)
+    def initialize(type = :pure, path = :default, wordnet_path = :search)
       @wordnet_connection = WordnetConnection.new(type, path, wordnet_path)
     end
     
@@ -30,6 +30,10 @@ module Words
     
     def connected
       @wordnet_connection.connected
+    end
+
+    def evocations_enabled?
+      @wordnet_connection.evocations_enabled?
     end
     
     def to_s

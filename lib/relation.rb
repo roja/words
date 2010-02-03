@@ -49,7 +49,7 @@ module Words
     end
 
     def destination
-      @destination = Synset.new(@dest_synset_id, @wordnet_connection, nil) unless defined? @destination
+      @destination ||= Synset.new(@dest_synset_id, @wordnet_connection, nil)
       @destination
     end
 
