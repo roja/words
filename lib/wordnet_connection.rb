@@ -137,9 +137,8 @@ module Words
         File.open(@wordnet_dir + "data.#{SHORT_TO_POS_FILE_TYPE[pos]}","r") do |file|
           file.seek(synset_id[1..-1].to_i)
           data_line, gloss = file.readline.strip.split(" | ")
-          data_parts = data_line.split(" ")
-          synset_id, lexical_filenum, synset_type, word_count = pos + data_parts.shift, data_parts.shift, data_parts.shift, data_parts.shift.to_i(16)
-          words = Array.new(word_count).map { "#{data_parts.shift}.#{data_parts.shift}" }
+          lexical_filenum, synset_type, word_count, *data_parts = data_line.split(" ")[1..-1]
+          words = Array.new(word_count.to_i(16)).map { "#{data_parts.shift}.#{data_parts.shift}" }
           relations = Array.new(data_parts.shift.to_i).map { "#{data_parts.shift}.#{data_parts.shift}.#{data_parts.shift}.#{data_parts.shift}" }
           { "synset_id" => synset_id, "lexical_filenum" => lexical_filenum, "synset_type" => synset_type, "words" => words.join('|'), "relations" => relations.join('|'), "gloss" => gloss.strip }
         end
