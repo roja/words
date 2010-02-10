@@ -1,5 +1,6 @@
 module Words
 
+    # Provides a pure ruby connector to the Wordnet dataset.
     class PureWordnetConnection
 
 	# Convert single letter POS to it's multi-letter equivilent
@@ -16,20 +17,33 @@ module Words
 	# Hash object used for caching retreved terms to further improve retreval performance
 	WORDS_CACHE = Hash.new
 
-	## Returns the underlying wordnet connection object.
+	## Returns the current connection status of the wordnet object.
 	#
-	# @return [PureWordnetConnection, TokyoWordnetConnection] the underlying wordnet connection object.
-	## Returns the underlying wordnet connection object.
+	# @return [true, false] The current connection status of the wordnet object.
+	attr_reader :connected
+	alias connected? connected
+	
+	# Returns the type of the current wordnet connection.
 	#
-	# @return [PureWordnetConnection, TokyoWordnetConnection] the underlying wordnet connection object.
-	## Returns the underlying wordnet connection object.
+	# @return [Symbol] The current wordnet connection type. Currently supported :pure & :tokyo.
+	attr_reader :connection_type
+	
+	# Returns the datapath currently in use (this may be irrelevent when using the pure connector and thus could be nil.)
 	#
-	# @return [PureWordnetConnection, TokyoWordnetConnection] the underlying wordnet connection object.
-	## Returns the underlying wordnet connection object.
+	# @return [Pathname, nil] The path to the data directory currently in use. Returns nil if unknown.
+	attr_reader :data_path
+	
+	# Returns the path to the wordnet collection currently in use (this may be irrelevent when using the tokyo connector and thus could be nil.)
 	#
-	# @return [PureWordnetConnection, TokyoWordnetConnection] the underlying wordnet connection object.
-	attr_reader :connected, :connection_type, :data_path, :wordnet_path
+	# @return [Pathname, nil] The path to the wordnet collection currently in use. Returns nil if unknown.
+	attr_reader :wordnet_path
 
+	# Constructs a new pure ruby connector for use with the words wordnet class.
+	#
+	# @param [Pathname] data_path Specifies the directory within which constructed datasets can be found (evocations etc...)
+	# @param [Pathname] wordnet_path Specifies the directory within which the wordnet dictionary can be found.
+	# @return [PureWordnetConnection] A new wordnet connection.
+	# @raise [BadWordnetConnector] If an invalid connector type is provided.
 	def initialize(data_path, wordnet_path)
 
 	    @data_path, @wordnet_path, @connection_type, @connected = data_path, wordnet_path, :pure, false
@@ -38,6 +52,9 @@ module Words
 
 	end
 
+	# Causes the connection specified within the wordnet object to be reopened if currently closed.
+	# 
+	# @raise [BadWordnetConnector] If an invalid connector type is provided.
 	def open!
 
 	    raise BadWordnetDataset, "Failed to locate the wordnet database. Please ensure it is installed and that if it resides at a custom path that path is given as an argument when constructing the Words object." if @wordnet_path.nil?
@@ -53,6 +70,8 @@ module Words
 	    
 	end
 
+	# Causes the current connection to wordnet to be closed.
+	#
 	def close!
 
 	    @connected = false
@@ -60,8 +79,12 @@ module Words
 
 	end
 
-	# main methods for connector
-
+	# Locates from a term any relevent homographs and constructs a homographs hash.
+	#
+	# @param [String] term The specific term that is desired from within wordnet.
+	# @param [true, false] use_cache Specify whether to use caching when finding and retreving terms.
+	# @result [Hash, nil] A hash in the format { 'lemma' => ..., 'tagsense_counts' => ..., 'synset_ids' => ...  }, or nil if no homographs are available.
+	# @raise [NoWordnetConnection] If there is currently no wordnet connection.
 	def homographs(term, use_cache = true)
 
 	    raise NoWordnetConnection, "There is presently no connection to wordnet. To attempt to reistablish a connection you should use the 'open!' command on the Wordnet object." unless connected?
@@ -110,6 +133,11 @@ module Words
 
 	end
 
+	# Locates from a synset_id a specific synset and constructs a synset hash.
+	#
+	# @param [String] synset_id The synset id to locate.
+	# @result [Hash, nil] A hash in the format { "synset_id" => ..., "lexical_filenum" => ..., "synset_type" => ..., "words" => ..., "relations" => ..., "gloss" => ... }, or nil if no synset is available.
+	# @raise [NoWordnetConnection] If there is currently no wordnet connection.
 	def synset(synset_id)
 
 	    raise NoWordnetConnection, "There is presently no connection to wordnet. To attempt to reistablish a connection you should use the 'open!' command on the Wordnet object." unless connected?
@@ -126,18 +154,27 @@ module Words
 
 	end
 
+	# Returns wheter evocations are currently avalable to use with the current wordnet object. (More information on setting these up can be found within the README)
+	#
+	# @return [true, false] Whether evocations are currently available or not.
 	def evocations?
 
 	    !evocations('n08112402').nil?
 
 	end
 
-	def evocations(senset_id)
+	# Locates from a synset id any relevent evocations and constructs an evocations hash.
+	#
+	# @see Synset
+	# @param [String] senset_id The id number of a specific synset.
+	# @result [Hash, nil] A hash in the format { 'relations' => ..., 'means' => ..., 'medians' => ... }, or nil if no evocations are available.
+	# @raise [NoWordnetConnection] If there is currently no wordnet connection.
+	def evocations(synset_id)
 
 	    raise NoWordnetConnection, "There is presently no connection to wordnet. To attempt to reistablish a connection you should use the 'open!' command on the Wordnet object." unless connected?
 
 	    if defined? @evocations
-		raw_evocations = @evocations[senset_id + "s"]
+		raw_evocations = @evocations[synset_id + "s"]
 		{ 'relations' => raw_evocations[0], 'means' => raw_evocations[1], 'medians' => raw_evocations[2]} unless raw_evocations.nil?
 	    else
 		nil
@@ -145,15 +182,15 @@ module Words
 
 	end
 
-
+	# Provides a textural description of the current connection state of the Wordnet object.
+	#
+	# @return [String] A textural description of the current connection state of the Wordnet object. e.g. "Words not Connected" or "Words running in pure mode using wordnet files found at /opt/wordnet"
 	def to_s
 
 	    "Words running in pure mode using wordnet files found at #{wordnet_path}"
 
 	end
 
-	alias connected? connected
-	
     end
 
 end

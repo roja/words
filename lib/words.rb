@@ -108,7 +108,7 @@ module Words
 
 	end
 
-	## Returns the current connection status of the wordnet object.
+	# Returns the current connection status of the wordnet object.
 	#
 	# @return [true, false] The current connection status of the wordnet object.
 	def connected?
@@ -117,7 +117,7 @@ module Words
 
 	end
 
-	## Returns wheter evocations are currently avalable to use with the current wordnet object. (More information on setting these up can be found within the README)
+	# Returns wheter evocations are currently avalable to use with the current wordnet object. (More information on setting these up can be found within the README)
 	#
 	# @return [true, false] Whether evocations are currently available or not.
 	def evocations?
