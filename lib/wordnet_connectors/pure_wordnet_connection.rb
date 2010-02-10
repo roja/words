@@ -21,7 +21,11 @@ module Words
 	#
 	# @return [true, false] The current connection status of the wordnet object.
 	attr_reader :connected
-	alias connected? connected
+
+	## Returns the current connection status of the wordnet object.
+	#
+	# @return [true, false] The current connection status of the wordnet object.
+	alias :connected? connected
 	
 	# Returns the type of the current wordnet connection.
 	#
