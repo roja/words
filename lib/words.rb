@@ -20,7 +20,7 @@ module Words
 
 	attr_reader :wordnet_connection
     
-	def initialize(connector_type = :pure, data_path = :default, wordnet_path = :search)
+	def initialize(connector_type = :pure, wordnet_path = :search, data_path = :default)
 
 	    # check and specify useful paths
 	    wordnet_path = Wordnet::locate_wordnet(wordnet_path)

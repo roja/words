@@ -180,7 +180,7 @@ module Words
     def evocations
       
       evocations_arr = @wordnet_connection.evocations(synset_id)
-      Evocations.new evocations_arr, self, @wordnet_connection unless evocations_arr.nil?
+      Evocations.new(evocations_arr, self, @wordnet_connection) unless evocations_arr.nil?
 
     end
 

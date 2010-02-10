@@ -1,12 +1,18 @@
 #!/usr/bin/env ruby
 
-#require 'rubygems'
-#require 'words'
-require 'lib/words.rb'
+require 'rubygems'
+require 'words'
+#require 'lib/words.rb'
 
 if __FILE__ == $0
   
-    wordnet = Words::Wordnet.new # :tokyo
+    wordnet = Words::Wordnet.new :tokyo
+
+    puts wordnet.connected? 
+    wordnet.close!
+    puts wordnet.connected?
+    wordnet.open!
+    puts wordnet.connected?
   
     puts wordnet
 
@@ -37,8 +43,10 @@ if __FILE__ == $0
     puts wordnet.find('jkashdfajkshfksjdhf')
 
     if wordnet.evocations?
-	puts wordnet.find("broadcast").senses.first.synset_id
+	puts wordnet.find("broadcast").senses.first.evocations
+	puts wordnet.find("broadcast").senses.first.evocations.means
 	puts wordnet.find("broadcast").senses.first.evocations[1].inspect
+	puts wordnet.find("broadcast").senses.first.evocations[20][:destination].words
     end
 
     wordnet.close!

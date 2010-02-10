@@ -6,6 +6,7 @@ Words implements a fast interface to [Wordnet®](http://wordnet.princeton.edu) w
 
 * Version 0.2 Introduced Pure Ruby Backend
 * Version 0.3 Introduced Evocation Support (see examples & below) as developed by the [Wordnet® Evocation Project](http://wordnet.cs.princeton.edu/downloads/evocation/release-0.4/README.TXT) 
+* Version 0.4 Substantial performance increase in pure mode (now faster at some things than the tokyo backend) and simplification of use! Full refactoring. Move to RSpec for testing.
 
 ## Pre-Installation ##
 
@@ -31,9 +32,12 @@ or (Windows)
 	Download http://wordnetcode.princeton.edu/3.0/WNdb-3.0.tar.gz
 	Unzip
 
+        # due to the way windows tends not to have a folder for things you will
+        # have to specify the location of the wordnet files when using the gem
+
 ## For Tokyo Backend Only ##
 
-Unless you want to use the tokyo backend you are now ready to install Words && build the data, otherwise if you want to use the tokyo backend (FAST!) you will also need [Tokyo Cabinet](http://1978th.net/tokyocabinet/) installed. It should be nice and easy... something like:
+Unless you want to use the tokyo backend you are now ready to install Words (and build the data if you want extras), otherwise if you want to use the tokyo backend (FAST!) you will also need [Tokyo Cabinet](http://1978th.net/tokyocabinet/) installed. It should be nice and easy... something like:
 
     # osx users should, if ports is installed, simply do
     sudo ports install tokyocabinet
@@ -61,18 +65,24 @@ Then your ready to rock and roll. :)
 
 ## Build Data ##
 
-To build the wordnet dataset (or index for pure) file yourself, from the original wordnet files, you can use the bundled "build_wordnet" command
+If all you want to do is use wordnet in it's standard form you don't have to do any databuilding and can skip this section. If however you either
+want to take advantage of evocations ([Wordnet® Evocation Project](http://wordnet.cs.princeton.edu/downloads/evocation/release-0.4/README.TXT)) or want to use the tokyo backend, read on!
+
+To build the wordnet dataset file yourself, from the original wordnet files, you can use the bundled "build_wordnet" command
 
 	build_wordnet -h # this will give you the usage information & additional options/features
 	
-	# this would attempt to build the tokyo backend data locating the original wordnet files through a search...
-	sudo build_wordnet -v --build-tokyo
+	# this would attempt to build the tokyo backend data locating the original wordnet
+        # files through a search...
+	sudo build_wordnet --build-tokyo
 	
-	# this would attempt to build the pure backend index locating the original wordnet files through a search...
-	sudo build_wordnet -v --build-pure
+	# this would attempt to build the tokyo backend locating the original wordnet files
+        # through a search with the addition of evocation support...
+	sudo build_wordnet --build-tokyo-with-evocations
 	
-	# this would attempt to build the tokyo backend index as above but also builds the evocations information into the dataset
-	sudo build_wordnet -v --build-pure --build-evocations
+	# this would attempt to build evocation support for the pure backend
+        # (remember no dataset needs to be built to use wordnet with the pure backend)
+	sudo build_wordnet --build-pure-evocations
 
 ## Usage ##
 
@@ -81,8 +91,19 @@ Heres a few little examples of using words within your programs.
     require 'rubygems'
     require 'words'
     
-    data = Words::Words.new # or: data = Words::Words.new(:pure) for the pure ruby backend
-    
+    data = Words::Wordnet.new # or: data = Words::Words.new(:tokyo) for the tokyo backend
+
+    # to specify a wordnet path Words::Words.new(:pure, '/path/to/wordnet')
+    # to specify the tokyo dataset Words::Words.new(:pure, :search, '/path/to/data.tct')
+
+    # play with connections
+    data.connected? # => true
+    data.close!
+    data.connected? # => false
+    data.open!
+    data.connected? # => true
+    data.connection_type # => :pure or :tokyo depending...
+
     # locate a word
     lemma = data.find("bat")
     
@@ -117,9 +138,14 @@ Heres a few little examples of using words within your programs.
     sense.derivationally_related_forms.first.source_word # => "bat"
     sense.derivationally_related_forms.first.destination_word # => "bat"
     sense.derivationally_related_forms.first.destination # => the synset of v01413191
-    
-    data.find("broadcast").senses.first.evocations # => sense relevant evocations
-    data.find("broadcast").senses.first.evocations[1] # => the evocation at index 1
+
+    if data.evocations? # check for evocation support
+       data.find("broadcast").senses.first.evocations # => sense relevant evocations
+       data.find("broadcast").senses.first.evocations[1] # => the evocation at index 1
+       data.find("broadcast").senses.first.evocations[1][:destination].words # => synset
+    end
+
+    data.close!
     
 These and more examples are available from within the examples.rb file!        
 

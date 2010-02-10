@@ -29,6 +29,7 @@ module Words
 		@connected = false
 		raise BadWordnetDataset, "Failed to locate the tokyo words dataset at #{@dataset_path}. Please insure you have created it using the words gems provided 'build_wordnet' command."
 	    end
+	    return nil
 
 	end
 
@@ -38,6 +39,7 @@ module Words
 		@connection.close
 		@connected = false
 	    end
+	    return nil
 
 	end
 
@@ -59,7 +61,7 @@ module Words
 
 	def evocations?
 
-	    !evocations('v00973074').nil?
+	    !evocations('n08112402').nil?
 
 	end
 

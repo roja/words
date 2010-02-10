@@ -1,78 +1,85 @@
- class Evocations
+# local includes
+require File.join(File.dirname(__FILE__), 'synset.rb')
 
-    def initialize(evocation_construct, source_synset, wordnet_connection)
+module Words
 
-      @wordnet_connection = wordnet_connection
-      @source = source_synset
-      @evocation_construct = evocation_construct
+    class Evocations
 
-    end
+	def initialize(evocation_construct, source_synset, wordnet_connection)
 
-    def means
+	    @wordnet_connection = wordnet_connection
+	    @source = source_synset
+	    @evocation_construct = evocation_construct
 
-      @means = @evocation_construct["means"].split('|') unless defined? @means
+	end
 
-      @means
+	def means
 
-    end
+	    @means = @evocation_construct["means"].split('|') unless defined? @means
 
-    def medians
+	    @means
 
-      @medians = @evocation_construct["medians"].split('|') unless defined? @medians
+	end
 
-      @medians
+	def medians
 
-    end
+	    @medians = @evocation_construct["medians"].split('|') unless defined? @medians
 
-    def size
+	    @medians
 
-      means.size
+	end
 
-    end
+	def size
 
-    def first
+	    means.size
 
-      self[0]
+	end
 
-    end
+	def first
 
-    def last
+	    self[0]
 
-      self[size-1]
+	end
 
-    end
+	def last
 
-    def [] (index)
+	    self[size-1]
 
-      { :destination => destinations[index], :mean => means[index], :median => medians[index] }
+	end
 
-    end
+	def [] (index)
 
-    def destinations(pos = :all)
+	    { :destination => Synset.new(destination_ids[index], @wordnet_connection, @source.homographs), :mean => means[index], :median => medians[index] }
 
-      destination_ids(pos).map { |synset_id| Synset.new synset_id, @wordnet_connection, @source.homographs }
+	end
 
-    end
+	def destinations(pos = :all)
 
-    def destination_ids(pos = :all)
+	    destination_ids(pos).map { |synset_id| Synset.new synset_id, @wordnet_connection, @source.homographs }
 
-      @destination_ids = @evocation_construct["relations"].split('|') unless defined? @destination_ids
+	end
 
-      case
-        when Homographs::SYMBOL_TO_POS.include?(pos.to_sym)
-        @destination_ids.select { |synset_id| synset_id[0,1] == Homographs::SYMBOL_TO_POS[pos.to_sym] }
-        when Homographs::POS_TO_SYMBOL.include?(pos.to_s)
-        @destination_ids.select { |synset_id| synset_id[0,1] == pos.to_s }
-      else
-        @destination_ids
-      end
+	def destination_ids(pos = :all)
 
-    end
+	    @destination_ids = @evocation_construct["relations"].split('|') unless defined? @destination_ids
 
-    def to_s
+	    case
+	    when Homographs::SYMBOL_TO_POS.include?(pos.to_sym)
+		@destination_ids.select { |synset_id| synset_id[0,1] == Homographs::SYMBOL_TO_POS[pos.to_sym] }
+	    when Homographs::POS_TO_SYMBOL.include?(pos.to_s)
+		@destination_ids.select { |synset_id| synset_id[0,1] == pos.to_s }
+	    else
+		@destination_ids
+	    end
 
-      "#{size} evocations from #{@source}"
+	end
+
+	def to_s
+
+	    "#{size} evocations from the #{@source}"
       
+	end
+
     end
 
-  end
+end

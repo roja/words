@@ -32,12 +32,14 @@ module Words
 	    File.open(evocation_path, 'r') do |file|
 		@evocations = Marshal.load file.read
 	    end if evocation_path.exist?
+	    return nil
 	    
 	end
 
 	def close!
 
 	    @connected = false
+	    return nil
 
 	end
 
@@ -109,7 +111,7 @@ module Words
 
 	def evocations?
 
-	    !evocations('v00973074').nil?
+	    !evocations('n08112402').nil?
 
 	end
 
