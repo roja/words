@@ -91,7 +91,7 @@ Heres a few little examples of using words within your programs.
     require 'rubygems'
     require 'words'
     
-    data = Words::Wordnet.new # or: data = Words::Words.new(:tokyo) for the tokyo backend
+    data = Words::Wordnet.new # or: data = Words::Wordnet.new(:tokyo) for the tokyo backend
 
     # to specify a wordnet path Words::Words.new(:pure, '/path/to/wordnet')
     # to specify the tokyo dataset Words::Words.new(:pure, :search, '/path/to/data.tct')
