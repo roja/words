@@ -8,11 +8,14 @@ module Words
 
     # we identify each wordnet connector installed and there paths
     SUPPORTED_CONNECTIORS = Dir[File.join(File.dirname(__FILE__),'wordnet_connectors','*_wordnet_connection.rb')].inject(Hash.new) { |connectors, connection_file| connectors[ File.basename(connection_file).split('_').first.to_sym ] = connection_file; connectors }
+    # an array of tippical wordnet install locations (if you have a standard install somewhere else please open as an issue in github so we can improve!)
     DEFAULT_WORDNET_LOCATIONS = ['/usr/share/wordnet', '/usr/local/share/wordnet', '/usr/local/WordNet-3.0', '/opt/WordNet-3.0', '/opt/wordnet', '/opt/local/share/WordNet-3.0/']
 
-    # specify some useful exception types
+    # Exception to indicate that the wordnet connector specified is not currently available/supported.
     class BadWordnetConnector < RuntimeError; end
+    # Exception to indicate that there is a problem connecting to a specified wordnet dataset.
     class BadWordnetDataset < RuntimeError; end
+    # Exception to indicate that there is not currently a connection to wordnet and thus any request cannot be fulfilled.
     class NoWordnetConnection < RuntimeError; end
 
     # The wordnet class provides a control come interface for interaction with the wordnet dataset of your choice. It creates a connection, based on specified paramaters, to a wordnet dataset and provides
