@@ -23,43 +23,6 @@ module Words
     # the means to interigate that dataset. In addition it provides control and information about that wordnet connection.
     class Wordnet
 
-	# DYNAMIC METHOD DOCUMENTATION -- We generate quite a few methods within this class so we should document them here
-
-	## Returns the type of the current wordnet connection.
-	#
-	# @return [Symbol] The current wordnet connection type. Currently supported :pure & :tokyo.
-	# :method connection_type
-
-	## Returns the path to the wordnet collection currently in use (this may be irrelevent when using the tokyo connector and thus could be nil.)
-	#
-	# @return [Pathname, nil] The path to the wordnet collection currently in use. Returns nil if unknown.
-	# :method wordnet_path
-
-	## Returns the datapath currently in use (this may be irrelevent when using the pure connector and thus could be nil.)
-	#
-	# @return [Pathname, nil] The path to the data directory currently in use. Returns nil if unknown.
-	# :method data_path
-
-	## Causes the current connection to wordnet to be closed.
-	#
-	# :method close!
-
-	## Causes the connection specified within the wordnet object to be reopened if currently closed.
-	#
-	# :method open!
-
-	## Returns the current connection status of the wordnet object.
-	#
-	# @return [true, false] The current connection status of the wordnet object.
-	# :method connected?
-
-	## Returns wheter evocations are currently avalable to use with the current wordnet object. (More information on setting these up can be found within the README)
-	#
-	# @return [true, false] Whether evocations are currently available or not.
-	# :method evocations?
-
-	# END DYNAMIC METHOD DOCUMENTATION
-
 	## Returns the underlying wordnet connection object.
 	#
 	# @return [PureWordnetConnection, TokyoWordnetConnection] the underlying wordnet connection object.
@@ -87,13 +50,6 @@ module Words
 	    # Construct the connector object
 	    @wordnet_connection = Words.const_get( File.basename(SUPPORTED_CONNECTIORS[connector_type], '.rb').gsub(/(^|_)(.)/) { $2.upcase } ).new(data_path, wordnet_path)
 	    
-	    # Construct some conveniance menthods for relation type access
-	    [:connection_type, :wordnet_path, :data_path, :close!, :open!, :connected?, :evocations?].each do |method_name|
-		self.class.send(:define_method, method_name) do
-		    @wordnet_connection.send method_name if defined? @wordnet_connection
-		end
-	    end
-
 	end
 
 	# Locates the set of homographs within wordnet specific to the term entered.
@@ -106,6 +62,67 @@ module Words
 	    raise NoWordnetConnection, "There is presently no connection to wordnet. To attempt to reistablish a connection you should use the 'open!' command on the Wordnet object." unless connected?
 	    homographs = @wordnet_connection.homographs(term)
 	    Homographs.new(homographs, @wordnet_connection) unless homographs.nil?
+
+	end
+
+	# Returns the type of the current wordnet connection.
+	#
+	# @return [Symbol] The current wordnet connection type. Currently supported :pure & :tokyo.
+	def connection_type
+
+	    @wordnet_connection.connection_type if defined? @wordnet_connection
+
+	end
+
+	# Returns the path to the wordnet collection currently in use (this may be irrelevent when using the tokyo connector and thus could be nil.)
+	#
+	# @return [Pathname, nil] The path to the wordnet collection currently in use. Returns nil if unknown.
+	def wordnet_path
+
+	    @wordnet_connection.wordnet_path if defined? @wordnet_connection
+
+	end
+
+	# Returns the datapath currently in use (this may be irrelevent when using the pure connector and thus could be nil.)
+	#
+	# @return [Pathname, nil] The path to the data directory currently in use. Returns nil if unknown.
+	def data_path
+
+	    @wordnet_connection.data_path if defined? @wordnet_connection
+
+	end
+
+	# Causes the current connection to wordnet to be closed.
+	#
+	def close!
+
+	    @wordnet_connection.close! if defined? @wordnet_connection
+
+	end
+
+	# Causes the connection specified within the wordnet object to be reopened if currently closed.
+	#
+	def open!
+
+	    @wordnet_connection.open! if defined? @wordnet_connection
+
+	end
+
+	## Returns the current connection status of the wordnet object.
+	#
+	# @return [true, false] The current connection status of the wordnet object.
+	def connected?
+
+	    @wordnet_connection.connected? if defined? @wordnet_connection
+
+	end
+
+	## Returns wheter evocations are currently avalable to use with the current wordnet object. (More information on setting these up can be found within the README)
+	#
+	# @return [true, false] Whether evocations are currently available or not.
+	def evocations?
+
+	    @wordnet_connection.evocations? if defined? @wordnet_connection
 
 	end
 
