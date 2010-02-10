@@ -1,4 +1,5 @@
-require "synset.rb"
+# local includes
+require File.join(File.dirname(__FILE__), 'synset.rb')
 
 module Words
 

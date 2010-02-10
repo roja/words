@@ -35,8 +35,13 @@ or (Windows)
 
 Unless you want to use the tokyo backend you are now ready to install Words && build the data, otherwise if you want to use the tokyo backend (FAST!) you will also need [Tokyo Cabinet](http://1978th.net/tokyocabinet/) installed. It should be nice and easy... something like:
 
+    # osx users should, if ports is installed, simply do
+    sudo ports install tokyocabinet
+
+    # otherwise the best route is from source
     wget http://1978th.net/tokyocabinet/tokyocabinet-1.4.41.tar.gz
-    cd tokyo-cabinet/
+    tar -xzf tokyocabinet-1.4.41.tar.gz
+    cd tokyocabinet-1.4.41/
     ./configure
     make
     sudo make install
