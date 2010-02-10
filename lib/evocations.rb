@@ -15,15 +15,11 @@ module Words
 
 	    @means ||= @evocation_construct["means"].split('|')
 
-	    @means
-
 	end
 
 	def medians
 
 	    @medians ||= @evocation_construct["medians"].split('|')
-
-	    @medians
 
 	end
 
