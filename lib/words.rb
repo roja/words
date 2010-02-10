@@ -15,11 +15,19 @@ module Words
     class BadWordnetDataset < RuntimeError; end
     class NoWordnetConnection < RuntimeError; end
 
-    # specify the wordnet control object
+    # The wordnet class provides a control come interface for interaction with the wordnet dataset of your choice. It creates a connection, based on specified paramaters, to a wordnet dataset and provides
+    # the means to interigate that dataset. In addition it provides control and information about that wordnet connection.
     class Wordnet
 
 	attr_reader :wordnet_connection
-    
+
+	# Constructs a new wordnet connection object.
+	#
+	# @param [Symbol] connector_type specifies the connector type or mode desired. Current supported connectors are :pure and :tokyo.
+	# @param [String, Symbol] wordnet_path specifies the directory within which the wordnet dictionary can be found. It can be set to :search to attempt to locate wordnet automatically.
+	# @param [String, Symbol] data_path specifies the directory within which constructed datasets can be found (tokyo index, evocations etc...) It can be set to :default to use the standard location inside the gem directory.
+	# @return [Wordnet] the wordnet connection object.
+	# @raise [BadWordnetConnector] If an invalid connector type is provided.
 	def initialize(connector_type = :pure, wordnet_path = :search, data_path = :default)
 
 	    # check and specify useful paths
@@ -44,6 +52,11 @@ module Words
 
 	end
 
+	# Locates the set of homographs within wordnet specific to the term entered.
+	#
+	# @param [String] term the specific term that is desired from within wordnet. This is caps insensative & we do a small amount of cleanup.
+	# @return [Homographs] an object encaptulating the homographs of the desired term. If the term cannot be located within wordnet then nil is returned.
+	# @raise [NoWordnetConnection] If there is currently no wordnet connection.
 	def find(term)
 
 	    raise NoWordnetConnection, "There is presently no connection to wordnet. To attempt to reistablish a connection you should use the 'open!' command on the Wordnet object." unless connected?
@@ -51,7 +64,10 @@ module Words
 	    Homographs.new(homographs, @wordnet_connection) unless homographs.nil?
 
 	end
-	
+
+	# Provides a textural description of the current connection state of the Wordnet object.
+	#
+	# @return [String] a textural description of the current connection state of the Wordnet object. e.g. "Words not Connected" or "Words running in pure mode using wordnet files found at /opt/wordnet"
 	def to_s
 
 	    # return a description of the connector
@@ -61,13 +77,17 @@ module Words
 
 	private
 
+	# Attempts to locates wordnet given an array of directories to look within
+	#
+	# @param [String, Array<String>, Symbol] base_dirs either a path, array of or the :search symbol. Will attempt to locate wordnet within these specified directories.
+	# @return [Pathname, nil] the pathname of the wordnet dictionary files or nil if they can't be located within the passed directorie(s)
 	def self.locate_wordnet(base_dirs)
 
 	    base_dirs = case base_dirs
 	    when :search
 		DEFAULT_WORDNET_LOCATIONS
 	    else
-		[ base_dirs ]
+		[ base_dirs ].flatten
 	    end
 
 	    base_dirs.each do |dir|
