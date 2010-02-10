@@ -24,11 +24,40 @@ module Words
     class Wordnet
 
 	# DYNAMIC METHOD DOCUMENTATION -- We generate quite a few methods within this class so we should document them here
-	##
+
+	## Returns the type of the current wordnet connection.
+	#
+	# @return [Symbol] The current wordnet connection type. Currently supported :pure & :tokyo.
 	# :method connection_type
-	##
+
+	## Returns the path to the wordnet collection currently in use (this may be irrelevent when using the tokyo connector and thus could be nil.)
+	#
+	# @return [Pathname, nil] The path to the wordnet collection currently in use. Returns nil if unknown.
 	# :method wordnet_path
-	##
+
+	## Returns the datapath currently in use (this may be irrelevent when using the pure connector and thus could be nil.)
+	#
+	# @return [Pathname, nil] The path to the data directory currently in use. Returns nil if unknown.
+	# :method data_path
+
+	## Causes the current connection to wordnet to be closed.
+	#
+	# :method close!
+
+	## Causes the connection specified within the wordnet object to be reopened if currently closed.
+	#
+	# :method open!
+
+	## Returns the current connection status of the wordnet object.
+	#
+	# @return [true, false] The current connection status of the wordnet object.
+	# :method connected?
+
+	## Returns wheter evocations are currently avalable to use with the current wordnet object. (More information on setting these up can be found within the README)
+	#
+	# @return [true, false] Whether evocations are currently available or not.
+	# :method evocations?
+
 	# END DYNAMIC METHOD DOCUMENTATION
 
 	## Returns the underlying wordnet connection object.
