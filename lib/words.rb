@@ -23,6 +23,9 @@ module Words
     # the means to interigate that dataset. In addition it provides control and information about that wordnet connection.
     class Wordnet
 
+	## Returns the underlying wordnet connection object.
+	#
+	# @return [PureWordnetConnection, TokyoWordnetConnection] the underlying wordnet connection object.
 	attr_reader :wordnet_connection
 
 	# Constructs a new wordnet connection object.
