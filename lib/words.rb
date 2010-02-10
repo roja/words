@@ -70,7 +70,7 @@ module Words
 	# @return [Symbol] The current wordnet connection type. Currently supported :pure & :tokyo.
 	def connection_type
 
-	    @wordnet_connection.connection_type if defined? @wordnet_connection
+	    @wordnet_connection.connection_type
 
 	end
 
@@ -79,7 +79,7 @@ module Words
 	# @return [Pathname, nil] The path to the wordnet collection currently in use. Returns nil if unknown.
 	def wordnet_path
 
-	    @wordnet_connection.wordnet_path if defined? @wordnet_connection
+	    @wordnet_connection.wordnet_path
 
 	end
 
@@ -88,7 +88,7 @@ module Words
 	# @return [Pathname, nil] The path to the data directory currently in use. Returns nil if unknown.
 	def data_path
 
-	    @wordnet_connection.data_path if defined? @wordnet_connection
+	    @wordnet_connection.data_path
 
 	end
 
@@ -96,7 +96,7 @@ module Words
 	#
 	def close!
 
-	    @wordnet_connection.close! if defined? @wordnet_connection
+	    @wordnet_connection.close!
 
 	end
 
@@ -104,7 +104,7 @@ module Words
 	#
 	def open!
 
-	    @wordnet_connection.open! if defined? @wordnet_connection
+	    @wordnet_connection.open!
 
 	end
 
@@ -113,7 +113,7 @@ module Words
 	# @return [true, false] The current connection status of the wordnet object.
 	def connected?
 
-	    @wordnet_connection.connected? if defined? @wordnet_connection
+	    @wordnet_connection.connected?
 
 	end
 
@@ -122,7 +122,7 @@ module Words
 	# @return [true, false] Whether evocations are currently available or not.
 	def evocations?
 
-	    @wordnet_connection.evocations? if defined? @wordnet_connection
+	    @wordnet_connection.evocations?
 
 	end
 
