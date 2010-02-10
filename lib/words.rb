@@ -44,11 +44,14 @@ module Words
 	    # Ensure we have a valid connector type
 	    raise BadWordnetConnector, "You specified an unsupported wordnet connector type. Supported connectors are: #{SUPPORTED_CONNECTIORS}" unless SUPPORTED_CONNECTIORS.include? connector_type
 
+	    # We can assume that the disired connector is now available
+	    desired_connector = SUPPORTED_CONNECTIORS[connector_type]
+
 	    # Assuming we have a valid connection type we can import the relevant code (the reason we do this dynamically is to reduce loadtime)
-	    require SUPPORTED_CONNECTIORS[connector_type]
+	    require desired_connector
 	     
 	    # Construct the connector object
-	    @wordnet_connection = Words.const_get( File.basename(SUPPORTED_CONNECTIORS[connector_type], '.rb').gsub(/(^|_)(.)/) { $2.upcase } ).new(data_path, wordnet_path)
+	    @wordnet_connection = Words.const_get( File.basename(desired_connector, '.rb').gsub(/(^|_)(.)/) { $2.upcase } ).new(data_path, wordnet_path)
 	    
 	end
 
