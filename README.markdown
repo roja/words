@@ -6,7 +6,7 @@ Words implements a fast interface to [Wordnet®](http://wordnet.princeton.edu) w
 
 * Version 0.2 Introduced Pure Ruby Backend
 * Version 0.3 Introduced Evocation Support (see examples & below) as developed by the [Wordnet® Evocation Project](http://wordnet.cs.princeton.edu/downloads/evocation/release-0.4/README.TXT) 
-* Version 0.4 Substantial performance increase in pure mode (now faster at some things than the tokyo backend) and simplification of use! Full refactoring. Move to RSpec for testing.
+* Version 0.4 Substantial performance increase in pure mode (now faster at some things than the tokyo backend) and simplification of use! Full refactoring. Move to RSpec for testing. API CHANGES: Words::Words -> Words::Wordnet, close -> close!, connected -> connected? and evocations_enabled? -> evocations?
 
 ## Pre-Installation ##
 
