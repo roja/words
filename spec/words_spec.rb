@@ -8,11 +8,11 @@ describe "Words Constructer" do
     end
 
     it "should when in pure mode, when provided with a bad wordnet directory, return a BadWordnetDataset exception" do
-	lambda { Words::Wordnet.new(:pure, :default, '/lib') }.should raise_exception(Words::BadWordnetDataset)
+	lambda { Words::Wordnet.new(:pure, '/lib') }.should raise_exception(Words::BadWordnetDataset)
     end
 
     it "should when in tokyo mode, when provided with a bad dataset directory, return a BadWordnetDataset exception" do
-	lambda { Words::Wordnet.new(:tokyo, '/lib') }.should raise_exception(Words::BadWordnetDataset)
+	lambda { Words::Wordnet.new(:tokyo, :search, '/lib') }.should raise_exception(Words::BadWordnetDataset)
     end
 
 end
