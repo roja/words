@@ -15,7 +15,7 @@ module Words
 
 	def means
 
-	    @means = @evocation_construct["means"].split('|') unless defined? @means
+	    @means ||= @evocation_construct["means"].split('|')
 
 	    @means
 
@@ -23,7 +23,7 @@ module Words
 
 	def medians
 
-	    @medians = @evocation_construct["medians"].split('|') unless defined? @medians
+	    @medians ||= @evocation_construct["medians"].split('|')
 
 	    @medians
 
@@ -61,7 +61,7 @@ module Words
 
 	def destination_ids(pos = :all)
 
-	    @destination_ids = @evocation_construct["relations"].split('|') unless defined? @destination_ids
+	    @destination_ids ||= @evocation_construct["relations"].split('|')
 
 	    case
 	    when Homographs::SYMBOL_TO_POS.include?(pos.to_sym)
