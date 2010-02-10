@@ -4,6 +4,7 @@ require 'pathname'
 # local includes
 require File.join(File.dirname(__FILE__),'homographs.rb')
 
+# The Words gem namespace. Within this we offer a number of classes to facilitate useful interaction with words and language. Currently this largly consists of [Words::Wordnet] which offers simple wordnet access.
 module Words
 
     # we identify each wordnet connector installed and there paths
