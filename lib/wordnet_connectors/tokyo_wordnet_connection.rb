@@ -6,11 +6,12 @@ module Words
 
     class TokyoWordnetConnection
 
-	attr_reader :connected, :connection_type, :data_path, :wordnet_path
+	attr_reader :connected?, :connection_type, :data_path, :wordnet_path
+#	alias connected? connected
 
 	def initialize(data_path, wordnet_path)
 
-	    @data_path, @wordnet_path, @connection_type, @connected = data_path, wordnet_path, :tokyo, false
+	    @data_path, @wordnet_path, @connection_type, @connected = data_path + 'wordnet.tct', wordnet_path, :tokyo, false
 
 	    # ensure we have the rufus gem loaded, else there is little point in continuing...
 	    raise BadWordnetConnector, "Coulden't find the rufus-tokyo gem. Please ensure it's installed." unless Gem.available?('rufus-tokyo')
@@ -21,13 +22,14 @@ module Words
 
 	def open!
 
-	    @dataset_path = @data_path + 'wordnet.tct'
-	    if @dataset_path.exist?
-		@connection = Rufus::Tokyo::Table.new(@dataset_path.to_s, :mode => 'r')
-		@connected = true
-	    else
-		@connected = false
-		raise BadWordnetDataset, "Failed to locate the tokyo words dataset at #{@dataset_path}. Please insure you have created it using the words gems provided 'build_wordnet' command."
+	    unless connected?
+		if @data_path.exist?
+		    @connection = Rufus::Tokyo::Table.new(@data_path.to_s, :mode => 'r')
+		    @connected = true
+		else
+		    @connected = false
+		    raise BadWordnetDataset, "Failed to locate the tokyo words dataset at #{@data_path}. Please insure you have created it using the words gems provided 'build_wordnet' command."
+		end
 	    end
 	    return nil
 
@@ -77,8 +79,6 @@ module Words
 	    "Words running in tokyo mode with dataset at #{@dataset_path}"
 
 	end
-
-	alias connected? connected
 
     end
 

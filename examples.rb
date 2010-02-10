@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 
-require 'rubygems'
-require 'words'
-#require 'lib/words.rb'
+#require 'rubygems'
+#require 'words'
+require 'lib/words.rb'
 
 if __FILE__ == $0
   

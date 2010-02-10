@@ -7,9 +7,7 @@ module Words
 
 	def initialize(evocation_construct, source_synset, wordnet_connection)
 
-	    @wordnet_connection = wordnet_connection
-	    @source = source_synset
-	    @evocation_construct = evocation_construct
+	    @evocation_construct, @source, @wordnet_connection = evocation_construct, source_synset, wordnet_connection
 
 	end
 
