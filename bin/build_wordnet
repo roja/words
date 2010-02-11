@@ -7,9 +7,11 @@ require 'pathname'
 require 'rubygems'
 
 # standard library includes
-require 'trollop'
+#require 'trollop'
 require 'zlib'
 require 'net/http'
+require 'optparse'
+require 'pp'
 
 # local includes
 require File.join(File.dirname(__FILE__), '..', 'lib', 'words.rb')
@@ -19,15 +21,49 @@ POS_FILE_TYPE_TO_SHORT = { 'adj' => 'a', 'adv' => 'r', 'noun' => 'n', 'verb' => 
 
 puts "Words Dataset Constructor 2010 (c) Roja Buck"
 
-opts = Trollop::options do
-    opt :quiet, "Don't output verbose program detail.", :default => false
-    opt :wordnet, "Location of the wordnet dictionary directory", :default => "Search..."
-    opt :build_tokyo, "Build the tokyo wordnet dataset?", :default => false
-    opt :build_tokyo_with_evocations, "Build the tokyo dataset with the similarity dataset based on the wordnet evocation project (requires internet connection)?", :default => false
-    opt :build_pure_evocations, "Build the similarity dataset based on the wordnet evocation project for use with the pure words mode (requires internet connection)", :default => false
+opts = { :quiet => false, :build_tokyo => false, :build_tokyo_with_evocations => false, :build_pure_evocations => false, :wordnet => 'Search...' }
+
+optparse = OptionParser.new do|option|
+
+    option.on( '-q', '--quiet', "Don't output verbose program detail. (Default: false)" ) do
+	opts[:quiet] = true
+    end
+
+    option.on( '-w', '--wordnet FILE', "Location of the wordnet dictionary directory. (Default: Search)" ) do|f|
+	opts[:wordnet] = f
+    end
+
+    option.on( '-t', '--build-tokyo', "Build the tokyo wordnet dataset? (Default: false)" ) do
+	opts[:build_tokyo] = true
+    end
+
+    option.on( '-x', '--build-tokyo-with-evocations', "Build the tokyo dataset with the similarity dataset based on the wordnet evocation project? (Default: false) NOTE: requires internet connection." ) do
+	opts[:build_tokyo_with_evocations] = true
+    end
+
+    option.on( '-e', '--build-pure-evocations', "Build the similarity dataset based on the wordnet evocation project for use with the pure words mode. (Default: false) NOTE: requires internet connection." ) do
+	opts[:build_pure_evocations] = true
+    end
+
+    option.on( '-h', '--help', 'Display this screen' ) do
+	puts option
+	exit
+    end
+
 end
-Trollop::die :build_tokyo, "You need to specify which dataset you want to build." if !opts[:build_tokyo] && !opts[:build_tokyo_with_evocations] && !opts[:build_pure_evocations]
+
+optparse.parse!
+
+if !opts[:build_tokyo] && !opts[:build_tokyo_with_evocations] && !opts[:build_pure_evocations]
+    puts "ERROR: You need to specify at least one dataset you want to build."
+    exit
+end
 puts "Verbose mode enabled" if (VERBOSE = !opts[:quiet])
+
+pp "Options:", opts
+
+exit
+
 
 require 'rufus-tokyo' if opts[:build_tokyo] || opts[:build_tokyo_with_evocations]
 
