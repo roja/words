@@ -1,3 +1,5 @@
+# coding: utf-8
+
 module Words
 
     # Provides a pure ruby connector to the Wordnet dataset.
@@ -94,7 +96,7 @@ module Words
 	    raise NoWordnetConnection, "There is presently no connection to wordnet. To attempt to reistablish a connection you should use the 'open!' command on the Wordnet object." unless connected?
 
 	    # Ensure that the term is either in the cache. If not, locate and add it if possable.
-	    cache_ensure_from_wordnet(term)
+	    cache_ensure_from_wordnet(term, use_cache)
 
 	    # We should either have the word in cache now or nowt... we should now change that into homograph input format (we do this here to improve performance during the cacheing performed above)
 	    cached_entry_to_homograph_hash(term)
@@ -161,7 +163,7 @@ module Words
 
 	private
 
-	def cache_ensure_from_wordnet(term)
+	def cache_ensure_from_wordnet(term, use_cache)
 
 	    # clean up the term
 	    term = term.gsub(" ", "_").downcase
@@ -176,19 +178,26 @@ module Words
 		file.seek INDEXES[index_pos][term_initials] # seek to the index starting point
 
 		while (line = file.gets) && (term_initials == line[0,2]) # break if line if EOF or we are past the term and thus the line doesnt start with the term initials
-		    lemma, pos, *index_parts = line.split(' ') # split the line and split off the lemma
-		    if (lemma == term || use_cache) # if it's the term we are after or we are using cache then we save the word
-			WORDS_CACHE[lemma] ||= [ lemma ] # ensure that there is datastructure to hold our word information
-			if !WORDS_CACHE[lemma].include?(index_pos) # unless there already exists an entry for said word associated with the current index
-			    tagsense_count, *synset_offsets = index_parts.slice(index_parts[1].to_i+3..-1) # seperate out what is useful from the index as a whole
-			    WORDS_CACHE[lemma] += [ pos, tagsense_count.to_i, synset_offsets ] # add the tagsense_count and the synsets for the pos
-			    break if lemma == term # if we have the word in this index then we can jump out and check the next
-			end
-		    end
+		    break if construct_cache_item(line, term, use_cache, index_pos)
 		end
 
 		file.close # close wordnet index file
 	    end unless WORDS_CACHE.include?(term) && use_cache # if we have the term already and are ok with using cache then simply use that!
+
+	end
+
+	def construct_cache_item(line, term, use_cache, index_pos)
+
+	    lemma, pos, *index_parts = line.split(' ') # split the line and split off the lemma
+	    if (lemma == term || use_cache) # if it's the term we are after or we are using cache then we save the word
+		WORDS_CACHE[lemma] ||= [ lemma ] # ensure that there is datastructure to hold our word information
+		if !WORDS_CACHE[lemma].include?(index_pos) # unless there already exists an entry for said word associated with the current index
+		    tagsense_count, *synset_offsets = index_parts.slice(index_parts[1].to_i+3..-1) # seperate out what is useful from the index as a whole
+		    WORDS_CACHE[lemma] += [ pos, tagsense_count.to_i, synset_offsets ] # add the tagsense_count and the synsets for the pos
+		    return true if lemma == term # if we have the word in this index then we can jump out and check the next index
+		end
+	    end
+	    return false
 
 	end
 

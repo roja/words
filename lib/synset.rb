@@ -1,3 +1,5 @@
+# coding: utf-8
+
 # local includes
 require File.join(File.dirname(__FILE__), 'relation.rb')
 require File.join(File.dirname(__FILE__), 'evocations.rb')

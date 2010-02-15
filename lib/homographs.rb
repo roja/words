@@ -1,3 +1,5 @@
+# coding: utf-8
+
 # local includes
 require File.join(File.dirname(__FILE__), 'synset.rb')
 

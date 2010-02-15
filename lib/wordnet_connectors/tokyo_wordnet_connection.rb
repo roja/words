@@ -1,3 +1,5 @@
+# coding: utf-8
+
 # gem includes
 require 'rubygems'
 require 'rufus-tokyo' if Gem.available?('rufus-tokyo')

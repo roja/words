@@ -19,6 +19,8 @@ end
 
 describe "Pure Words Constructor" do
 
+    #    should when in pure mode, , return
+
     before do
 	@words = Words::Wordnet.new(:pure)
     end
@@ -53,6 +55,12 @@ describe "Pure Words Constructor" do
 	@words.to_s.should match 'Words not connected'
     end
 
+    it "should when in pure mode, when the connection is closed and then re-opened, report itself as open" do
+	@words.close!
+	@words.open!
+	@words.connected?.should be_true
+    end
+
     it "should when in pure mode, when the connection is closed, raise NoWordnetConnection exception if a find is attempted" do
 	@words.close!
 	lambda { @words.find('test') }.should raise_exception(Words::NoWordnetConnection)
@@ -60,6 +68,18 @@ describe "Pure Words Constructor" do
 
     it "should when checked report itself as a pure connection" do
 	@words.connection_type.should equal :pure
+    end
+
+    it "should when in pure mode, when given a term within wordnet, return a valid response" do
+	@words.find("mouse").should_not be_nil
+    end
+
+    it "should when in pure mode, when given a term not in wordnet, return nil" do
+	@words.find("lksdhflasdf;lkjdsfkljsdlkfjsadlkf").should be_nil
+    end
+
+    it "should when in pure mode, (assuming evocations are installed on the test environment) return true when asked if evocations are available, return nil" do
+	@words.evocations?.should be_true
     end
 
 end
@@ -100,6 +120,12 @@ describe "Tokyo Words Constructor" do
 	@words.to_s.should match 'Words not connected'
     end
 
+    it "should when in tokyo mode, when the connection is closed and then re-opened, report itself as open" do
+	@words.close!
+	@words.open!
+	@words.connected?.should be_true
+    end
+
     it "should when in tokyo mode, when the connection is closed, raise NoWordnetConnection exception if a find is attempted" do
 	@words.close!
 	lambda { @words.find('test') }.should raise_exception(Words::NoWordnetConnection)
@@ -107,6 +133,18 @@ describe "Tokyo Words Constructor" do
 
     it "should when checked report itself as a tokyo connection" do
 	@words.connection_type.should equal :tokyo
+    end
+
+    it "should when in tokyo mode, when given a term within wordnet, return a valid response" do
+	@words.find("mouse").should_not be_nil
+    end
+
+    it "should when in tokyo mode, when given a term not in wordnet, return nil" do
+	@words.find("lksdhflasdf;lkjdsfkljsdlkfjsadlkf").should be_nil
+    end
+
+    it "should when in tokyo mode, (assuming evocations are installed on the test environment) return true when asked if evocations are available, return nil" do
+	@words.evocations?.should be_true
     end
     
 end
