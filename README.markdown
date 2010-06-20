@@ -19,6 +19,9 @@ First ensure you have a copy of the wordnet data files. This is generally availa
     
     #Fedora/RHL
     sudo yum update wordnet
+
+    #OSX HomeBrew
+    sudo brew install wordnet
     
     #MacPorts
     sudo port install wordnet
