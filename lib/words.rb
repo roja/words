@@ -159,7 +159,6 @@ module Words
 	    base_dirs.each do |dir|
 		["", "dict/"].each do |sub_folder|
 		    path = Pathname.new(dir + sub_folder)
-			puts path
 		    return path if (path + "data.noun").exist?
 		end
 	    end
