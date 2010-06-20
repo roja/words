@@ -12,7 +12,7 @@ module Words
     # We identify each wordnet connector installed and there paths
     SUPPORTED_CONNECTIORS = Dir[File.join(File.dirname(__FILE__),'wordnet_connectors','*_wordnet_connection.rb')].inject(Hash.new) { |connectors, connection_file| connectors[ File.basename(connection_file).split('_').first.to_sym ] = connection_file; connectors }
     # An array of tippical wordnet install locations (if you have a standard install somewhere else please open as an issue in github so we can improve!)
-    DEFAULT_WORDNET_LOCATIONS = ['/usr/share/wordnet', '/usr/local/share/wordnet', '/usr/local/WordNet-3.0', '/opt/WordNet-3.0', '/opt/wordnet', '/opt/local/share/WordNet-3.0/', '/usr/local/Cellar/wordnet/3.0']
+    DEFAULT_WORDNET_LOCATIONS = ['/usr/share/wordnet/', '/usr/local/share/wordnet/', '/usr/local/WordNet-3.0/', '/opt/WordNet-3.0/', '/opt/wordnet/', '/opt/local/share/WordNet-3.0/', '/usr/local/Cellar/wordnet/3.0/']
 
     # Exception to indicate that the wordnet connector specified is not currently available/supported.
     class BadWordnetConnector < RuntimeError; end
@@ -157,8 +157,9 @@ module Words
 	    end
 
 	    base_dirs.each do |dir|
-		["", "dict"].each do |sub_folder|
+		["", "dict/"].each do |sub_folder|
 		    path = Pathname.new(dir + sub_folder)
+			puts path
 		    return path if (path + "data.noun").exist?
 		end
 	    end

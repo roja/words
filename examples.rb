@@ -7,7 +7,7 @@ require 'lib/words.rb'
 
 if __FILE__ == $0
   
-    wordnet = Words::Wordnet.new :tokyo
+    wordnet = Words::Wordnet.new #:tokyo
 
     puts wordnet.connected? 
     wordnet.close!
