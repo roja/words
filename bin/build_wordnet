@@ -60,11 +60,6 @@ if !opts[:build_tokyo] && !opts[:build_tokyo_with_evocations] && !opts[:build_pu
 end
 puts "Verbose mode enabled" if (VERBOSE = !opts[:quiet])
 
-pp "Options:", opts
-
-exit
-
-
 require 'rufus-tokyo' if opts[:build_tokyo] || opts[:build_tokyo_with_evocations]
 
 gem_path = Pathname.new "#{File.dirname(__FILE__)}/.."
